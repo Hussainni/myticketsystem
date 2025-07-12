@@ -1,0 +1,40 @@
+backend/
+│
+├── config/                 # DB connection, env setup
+│   └── db.js
+│
+├── controllers/           # Logic for each route (e.g., tickets, users)
+│   ├── authController.js
+│   ├── userController.js
+│   ├── ticketController.js
+│   └── commentController.js
+│
+├── middleware/            # Auth, error handling, role checks
+│   ├── authMiddleware.js
+│   └── roleMiddleware.js
+│
+├── models/                # Mongoose schemas
+│   ├── User.js
+│   ├── Ticket.js
+│   └── Comment.js
+│
+├── routes/                # Route definitions
+│   ├── authRoutes.js
+│   ├── userRoutes.js
+│   ├── ticketRoutes.js
+│   └── commentRoutes.js
+│
+├── uploads/               # Uploaded files (attachments)
+│   └── (handled by multer)
+│
+├── utils/                 # Helper functions (e.g., JWT, email, etc.)
+│   └── generateToken.js
+│
+├── seed/                  # Admin seed script
+│   └── seedAdmin.js
+│
+├── .env                   # Environment variables (Mongo URI, JWT secret)
+├── .gitignore
+├── package.json
+├── server.js              # Entry point
+└── README.md
