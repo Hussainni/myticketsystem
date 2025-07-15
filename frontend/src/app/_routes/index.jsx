@@ -91,6 +91,16 @@ import AllTicketsPage from "@app/pages/admin/all-tickets/page";
 import AgentsPage from "@app/pages/admin/Support Agents";
 import OverviewPage from "@app/pages/admin/overview";
 import TicketDetailsPage from "@app/pages/admin/all-tickets/[ticketId]";
+import EmployeeOverviewPage from "@app/pages/employee/overview";
+import MyTicketsPage from "@app/pages/employee/tickets";
+import TicketDetailEmployee from "@app/pages/employee/tickets/[ticketId]";
+import CreateTicketPage from "@app/pages/employee/createTickets";
+import AgentOverviewPage from "@app/pages/support-agent/overview";
+import AssignedTicketsPage from "@app/pages/support-agent/assigned-tickets";
+import TicketDetailAgentPage from "@app/pages/support-agent/assigned-tickets/[ticketId]";
+import FilteringAndSearchingPage from "@app/pages/support-agent/filter&search";
+import TicketDetailPage from "@app/pages/employee/tickets/[ticketId]";
+import FilterTicketDetailPage from "@app/pages/support-agent/filter&search/[ticketId]";
 
 const routes = [
   {
@@ -129,7 +139,7 @@ const routes = [
 
 
 
-      // ...................
+      // .
       {
         path: "/admin-dashboard/sample",
         element: <Page Component={SamplePage} hoc={withAuth} />,
@@ -151,6 +161,47 @@ const routes = [
         path: "/user/profile-1",
         element: <Page Component={UserProfile1} hoc={withAuth} />,
       },
+
+      // employee dashboard routes
+      {
+        path: "employee-dashboard/overview",
+        element: <Page Component={EmployeeOverviewPage} hoc={withAuth} />,
+      },
+      {
+        path: "/employee-dashboard/tickets",
+        element: <Page Component={MyTicketsPage} hoc={withAuth} />,
+      },
+      {
+        path: "/employee-dashboard/tickets/:ticketId",
+        element: <Page Component={TicketDetailEmployee} hoc={withAuth} />,
+      },
+      {
+        path: "/employee-dashboard/create-tickets",
+        element: <Page Component={CreateTicketPage} hoc={withAuth} />,
+      },
+
+
+      // Support Agent routes 
+      {
+        path: "/support-agent-dashboard/overview",
+        element: <Page Component={AgentOverviewPage} hoc={withAuth} />,
+      },
+      {
+        path: "/support-agent-dashboard/assigned-tickets",
+        element: <Page Component={AssignedTicketsPage} hoc={withAuth} />,
+      },
+      {
+        path: "/support-agent-dashboard/assigned-tickets/:ticketId",
+        element: <Page Component={TicketDetailAgentPage} hoc={withAuth} />,
+      },
+      // {
+      //   path: "/support-agent-dashboard/filter&search",
+      //   element: <Page Component={FilteringAndSearchingPage} hoc={withAuth} />,
+      // },
+      // {
+      //   path: "/support-agent-dashboard/filter&search/:ticketId",
+      //   element: <Page Component={FilterTicketDetailPage} hoc={withAuth} />,
+      // },
     ],
   },
 

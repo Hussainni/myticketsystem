@@ -9,7 +9,7 @@ export function getMenus() {
 
   if (loggedInUser?.role === "admin") {
     menuItems = [
-         {
+      {
         path: "/admin-dashboard/overview",
         label: t("Overview"),
         icon: "settings",
@@ -29,11 +29,11 @@ export function getMenus() {
         label: t("Assign Tickets"),
         icon: "settings",
       },
-      {
-        path: "/admin-dashboard/support-agents",
-        label: t("Support Agents"),
-        icon: "settings",
-      },
+      // {
+      //   path: "/admin-dashboard/support-agents",
+      //   label: t("Support Agents"),
+      //   icon: "settings",
+      // },
       {
         path: "/admin-dashboard/users",
         label: t("Users"),
@@ -43,28 +43,39 @@ export function getMenus() {
   } else if (loggedInUser?.role === "employee") {
     menuItems = [
       {
-        path: "/tickets/my",
-        label: t("My Tickets"),
-        icon: "confirmation_number",
+        path: "/employee-dashboard/overview",
+        label: t("Overview"),
+        icon: "settings",
       },
       {
-        path: "/tickets/create",
+        path: "/employee-dashboard/tickets",
+        label: t("My Tickets"),
+        icon: "settings",
+      },
+      {
+        path: "/employee-dashboard/create-tickets",
         label: t("Create Ticket"),
-        icon: "add_circle",
+        icon: "settings",
       },
     ];
   } else if (loggedInUser?.role === "support") {
     menuItems = [
+       {
+        path: "/support-agent-dashboard/overview",
+        label: t("Overview"),
+        icon: "settings",
+      },
+      // {
+      //   path: "/support-agent-dashboard/filter&search",
+      //   label: t("Filters & Search"),
+      //   icon: "settings",
+      // },
       {
-        path: "/tickets/assigned",
+        path: "/support-agent-dashboard/assigned-tickets",
         label: t("Assigned Tickets"),
-        icon: "assignment_ind",
+        icon: "settings",
       },
-      {
-        path: "/tickets/all",
-        label: t("All Tickets"),
-        icon: "confirmation_number",
-      },
+   
     ];
   }
 
@@ -78,4 +89,3 @@ export function getMenus() {
 
 
 
- 

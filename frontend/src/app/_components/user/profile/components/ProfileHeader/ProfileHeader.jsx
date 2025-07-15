@@ -15,9 +15,11 @@ import {
 import { getAssetPath } from "@app/_utilities/helpers";
 import { ASSET_AVATARS } from "@app/_utilities/constants/paths";
 import { ContentHeader } from "@app/_components/_core";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@app/_components/_core/AuthProvider/hooks";
+import EditProfileModal from "@app/pages/user/settings/model1";
+import ChangePasswordModal from "@app/pages/user/settings/model2";
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
   padding: theme.spacing(0, 1),
@@ -36,15 +38,18 @@ const Item = styled("div")({
 });
 
 const ProfileHeader = () => {
+    const [openEdit, setOpenEdit] = React.useState(false);
+  const [openPassword, setOpenPassword] = React.useState(false);
   const navigate = useNavigate();
-  const { user, userLoading, refreshUser } = useAuth();
+  const { loggedInUser, userLoading, refreshUser } = useAuth();
+
 
   // Refresh user data when component mounts
   React.useEffect(() => {
-    if (!user) {
+    if (!loggedInUser) {
       refreshUser();
     }
-  }, [user, refreshUser]);
+  }, [loggedInUser, refreshUser]);
 
   // Show loading state
   if (userLoading) {
@@ -86,18 +91,18 @@ const ProfileHeader = () => {
       avatar={
         <Avatar
           sx={{ width: { xs: 48, sm: 72 }, height: { xs: 48, sm: 72 } }}
-          alt={user?.name || "User"}
-          src={user?.profile_pic || getAssetPath(`${ASSET_AVATARS}/avatar3.jpg`, "72x72")}
+          alt={loggedInUser?.name || "User"}
+          src={loggedInUser?.profile_pic || getAssetPath(`${ASSET_AVATARS}/avatar3.jpg`, "72x72")}
         />
       }
       title={
         <Typography fontSize={18} variant={"body1"} color={"inherit"}>
-          {user?.name || "User Profile"}
+          {loggedInUser?.name || "User Profile"}
         </Typography>
       }
       subheader={
         <Typography fontSize={12} variant={"body1"} color={"inherit"} mt={0.5}>
-          {user?.email || "No email available"}
+          {loggedInUser?.email || "No email available"}
         </Typography>
       }
       children={
@@ -112,7 +117,7 @@ const ProfileHeader = () => {
         >
           <Item>
             <Typography variant={"h6"} color={"inherit"} mb={0}>
-              {user?.name ? user.name.length : 0}
+              {loggedInUser?.name ? loggedInUser.name.length : 0}
             </Typography>
             <Typography variant={"body1"} fontSize={12}>
               Name Length
@@ -120,7 +125,7 @@ const ProfileHeader = () => {
           </Item>
           <Item>
             <Typography variant={"h6"} color={"inherit"} mb={0}>
-              {user?.email ? user.email.length : 0}
+              {loggedInUser?.email ? loggedInUser.email.length : 0}
             </Typography>
             <Typography variant={"body1"} fontSize={12}>
               Email Length
@@ -128,7 +133,7 @@ const ProfileHeader = () => {
           </Item>
           <Item>
             <Typography variant={"h6"} color={"inherit"} mb={0}>
-              {user?.createdAt ? new Date(user.createdAt).getFullYear() : "N/A"}
+              {loggedInUser?.createdAt ? new Date(loggedInUser.createdAt).getFullYear() : "N/A"}
             </Typography>
             <Typography variant={"body1"} fontSize={12}>
               Joined
@@ -149,44 +154,45 @@ const ProfileHeader = () => {
           <StyledMenuItem>Security</StyledMenuItem>
         </List>
       }
-      action={
-        user ? (
-          <Stack direction="row" spacing={1}>
-            <Button
-              disableRipple
-              variant="outlined"
-              startIcon={<EditIcon />}
-              onClick={() => navigate('/user/settings/edit-profile')}
-              sx={{
-                color: "inherit",
+      action={loggedInUser ? (
+        <Stack direction="row" spacing={1}>
+          <Button
+            disableRipple
+            variant="outlined"
+            startIcon={<EditIcon />}
+            // onClick={() => navigate('/user/settings/edit-profile')}
+            onClick={() => setOpenEdit(true)}
+            sx={{
+              color: "inherit",
+              borderColor: "inherit",
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
                 borderColor: "inherit",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  borderColor: "inherit",
-                },
-              }}
-            >
-              Edit Profile
-            </Button>
-            <Button
-              disableRipple
-              variant="outlined"
-              startIcon={<LockIcon />}
-              onClick={() => navigate('/user/settings/change-password')}
-              sx={{
-                color: "inherit",
+              },
+            }}
+          >
+            Edit Profile
+          </Button>
+          <Button
+            disableRipple
+            variant="outlined"
+            startIcon={<LockIcon />}
+            // onClick={() => navigate('/user/settings/change-password')}
+            onClick={() => setOpenPassword(true)}
+            sx={{
+              color: "inherit",
+              borderColor: "inherit",
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
                 borderColor: "inherit",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  borderColor: "inherit",
-                },
-              }}
-            >
-              Change Password
-            </Button>
-            <Button
+              },
+            }}
+          >
+            Change Password
+          </Button>
+          {/* <Button
               disableRipple
               variant="text"
               startIcon={<SettingsIcon />}
@@ -199,26 +205,29 @@ const ProfileHeader = () => {
               }}
             >
               Settings
-            </Button>
-          </Stack>
-        ) : (
-          <Button
-            disableRipple
-            variant="outlined"
-            onClick={() => navigate('/auth/login')}
-            sx={{
-              color: "inherit",
+            </Button> */}
+
+          <EditProfileModal open={openEdit} onClose={() => setOpenEdit(false)} />
+          <ChangePasswordModal open={openPassword} onClose={() => setOpenPassword(false)} />
+        </Stack>
+      ) : (
+        <Button
+          disableRipple
+          variant="outlined"
+          onClick={() => navigate('/auth/login')}
+          sx={{
+            color: "inherit",
+            borderColor: "inherit",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
               borderColor: "inherit",
-              textTransform: "none",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-                borderColor: "inherit",
-              },
-            }}
-          >
-            Login
-          </Button>
-        )
+            },
+          }}
+        >
+          Login
+        </Button>
+      )
       }
       sx={{
         position: "relative",

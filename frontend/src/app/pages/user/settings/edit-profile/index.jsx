@@ -36,7 +36,7 @@ const EditProfile = () => {
 
     try {
       const response = await axios.put(
-        "http://localhost:3000/api/user/update-profile",
+        "http://localhost:3000/api/users/profile",
         {
           name: data.name,
           email: data.email,
@@ -44,39 +44,32 @@ const EditProfile = () => {
         { withCredentials: true }
       );
 
-      if (response.data.success) {
+      // ✅ Assume response contains updated user object
+      const updatedUser = response.data.user;
+
+      if (updatedUser) {
         setSuccess("Profile updated successfully!");
-        
-        // Update user data in AuthProvider
-        updateUser(response.data.user);
-        
-        // Show success toast
+        updateUser(updatedUser);
+
         toast.success("Profile updated successfully!", {
           position: "top-right",
           autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
         });
-        
-        // Redirect after 2 seconds
+
         setTimeout(() => {
-          navigate("/");
+          navigate("/"); // redirect if needed
         }, 2000);
+      } else {
+        throw new Error("Invalid response from server.");
       }
+
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Failed to update profile";
       setError(errorMessage);
-      
-      // Show error toast
+
       toast.error(errorMessage, {
         position: "top-right",
         autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
       });
     } finally {
       setLoading(false);
@@ -86,7 +79,7 @@ const EditProfile = () => {
   return (
     <>
       <SettingHeader title={"Edit Profile"} />
-      
+
       <JumboCard
         title={"Update Your Profile Information"}
         contentWrapper
@@ -97,7 +90,7 @@ const EditProfile = () => {
             {error}
           </Alert>
         )}
-        
+
         {success && (
           <Alert severity="success" sx={{ mb: 2 }}>
             {success}
@@ -130,10 +123,11 @@ const EditProfile = () => {
               variant="contained"
               size="large"
               loading={loading}
-              disabled={!user}
+              disabled={loading}  
             >
               Update Profile
             </LoadingButton>
+
           </Stack>
         </JumboForm>
 
@@ -155,4 +149,4 @@ const EditProfile = () => {
   );
 };
 
-export default EditProfile; 
+export default EditProfile;

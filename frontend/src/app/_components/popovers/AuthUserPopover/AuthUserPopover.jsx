@@ -23,6 +23,7 @@ const AuthUserPopover = () => {
   const { theme } = useJumboTheme();
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const {loggedInUser} = useAuth()
 
   async function handleLogout() {
     await logout();
@@ -51,12 +52,12 @@ const AuthUserPopover = () => {
         >
           <Avatar
             src={authUser?.profile_pic}
-            alt={authUser.name}
+            alt={loggedInUser.name}
             sx={{ width: 60, height: 60, mb: 2 }}
           />
-          <Typography variant={"h5"}>{authUser.name}</Typography>
+          <Typography variant={"h5"}>{loggedInUser.name}</Typography>
           <Typography variant={"body1"} color="text.secondary">
-            {authUser.handle}
+            {loggedInUser.email}
           </Typography>
         </Div>
         <Divider />
@@ -68,7 +69,7 @@ const AuthUserPopover = () => {
               </ListItemIcon>
               <ListItemText primary="Profile" sx={{ my: 0 }} />
             </ListItemButton>
-            <ListItemButton>
+            {/* <ListItemButton>
               <ListItemIcon sx={{ minWidth: 36 }}>
                 <RepeatOutlinedIcon />
               </ListItemIcon>
@@ -77,7 +78,7 @@ const AuthUserPopover = () => {
                 primary="Switch User"
                 sx={{ my: 0 }}
               />
-            </ListItemButton>
+            </ListItemButton> */}
             <ListItemButton onClick={handleLogout}>
               <ListItemIcon sx={{ minWidth: 36 }}>
                 <LogoutIcon />

@@ -83,8 +83,8 @@ const UserProfile1 = () => {
     >
       <Stack spacing={3.75}>
         <About />
-        <Biography />
-        <Events />
+        {/* <Biography />
+        <Events /> */}
       </Stack>
     </ContentLayout>
   );

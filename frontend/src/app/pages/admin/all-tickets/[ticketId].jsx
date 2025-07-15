@@ -11,9 +11,14 @@ import {
   CircularProgress,
   Button,
   Stack,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import axios from "axios";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CommentSection from "../../components/CommentSection";
 
 const statusColors = {
   Open: "warning",
@@ -27,23 +32,38 @@ const TicketDetailsPage = () => {
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
-    const fetchTicketDetails = async () => {
-      try {
-        const res = await axios.get(`http://localhost:3000/api/tickets/${ticketId}`, {
-          withCredentials: true,
-        });
-        setTicket(res.data);
-      } catch (error) {
-        console.error("Error fetching ticket:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTicketDetails();
   }, [ticketId]);
+
+  const fetchTicketDetails = async () => {
+    try {
+      const res = await axios.get(`http://localhost:3000/api/tickets/${ticketId}`, {
+        withCredentials: true,
+      });
+      setTicket(res.data);
+      setStatus(res.data.status);
+    } catch (error) {
+      console.error("Error fetching ticket:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      await axios.patch(
+        `http://localhost:3000/api/tickets/${ticketId}/status`,
+        { status: newStatus },
+        { withCredentials: true }
+      );
+      setStatus(newStatus);
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -72,14 +92,14 @@ const TicketDetailsPage = () => {
         Back
       </Button>
 
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h5" fontWeight={600}>
             {ticket.title}
           </Typography>
           <Chip
-            label={ticket.status}
-            color={statusColors[ticket.status] || "default"}
+            label={status}
+            color={statusColors[status] || "default"}
             size="medium"
           />
         </Box>
@@ -109,12 +129,30 @@ const TicketDetailsPage = () => {
           </Typography>
           <Typography variant="body2">
             <strong>Created By:</strong> {ticket.createdBy?.name || "N/A"}
+            <strong>Role:</strong> {ticket.createdBy?.role || "N/A"}
           </Typography>
+          
           <Typography variant="body2">
             <strong>Assigned To:</strong> {ticket.assignedTo?.name || "Unassigned"}
           </Typography>
         </Stack>
+
+        <FormControl fullWidth sx={{ mt: 3 }}>
+          <InputLabel>Update Status</InputLabel>
+          <Select
+            value={status}
+            label="Update Status"
+            onChange={(e) => handleStatusChange(e.target.value)}
+          >
+            <MenuItem value="Open">Open</MenuItem>
+            <MenuItem value="In Progress">In Progress</MenuItem>
+            <MenuItem value="Resolved">Resolved</MenuItem>
+            <MenuItem value="Closed">Closed</MenuItem>
+          </Select>
+        </FormControl>
       </Paper>
+
+      <CommentSection ticketId={ticket._id} />
     </Box>
   );
 };

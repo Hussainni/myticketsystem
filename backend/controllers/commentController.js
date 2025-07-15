@@ -33,7 +33,7 @@ export const getCommentsByTicket = async (req, res) => {
   try {
     const comments = await Comment.find({ ticketId })
       .populate("userId", "name email")
-      .sort({ createdAt: 1 }); // show in ascending order == 1
+      .sort({ createdAt: 1 }); 
 
     res.status(200).json(comments);
   } catch (error) {

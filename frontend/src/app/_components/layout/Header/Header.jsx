@@ -37,10 +37,10 @@ function Header() {
       <Search show={searchVisibility} onClose={handleSearchVisibility} />
       <Stack direction="row" alignItems="center" gap={1.25} sx={{ ml: "auto" }}>
         <ThemeModeOption />
-        <TranslationPopover />
-        <SearchIconButtonOnSmallScreen onClick={handleSearchVisibility} />
-        <MessagesPopover />
-        <NotificationsPopover />
+        {/* <TranslationPopover /> */}
+        {/* <SearchIconButtonOnSmallScreen onClick={handleSearchVisibility} /> */}
+        {/* <MessagesPopover /> */}
+        {/* <NotificationsPopover /> */}
         <AuthUserPopover />
       </Stack>
     </React.Fragment>

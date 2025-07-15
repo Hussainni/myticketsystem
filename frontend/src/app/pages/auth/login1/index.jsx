@@ -27,11 +27,11 @@ export default function Login1() {
   const { isAuthenticated, loading, loggedInUser } = useAuth();
   if (loading) return null;
   if (isAuthenticated && loggedInUser?.role === "admin") {
-    return <Navigate to="/admin-dashboard" />;
+    return <Navigate to="/admin-dashboard/overview" />;
   } else if (isAuthenticated && loggedInUser?.role === "employee") {
-    return <Navigate to="/employee-dashboard" />;
+    return <Navigate to="/employee-dashboard/overview" />;
   } else if (isAuthenticated && loggedInUser?.role === "support") {
-    return <Navigate to="/support-dashboard" />;
+    return <Navigate to="/support-agent-dashboard/overview" />;
   }
   return (
     <Div

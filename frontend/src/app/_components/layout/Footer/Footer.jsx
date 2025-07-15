@@ -4,15 +4,15 @@ import { Button, Typography } from "@mui/material";
 const Footer = () => {
   return (
     <Div
-      sx={{
-        py: 2,
-        px: { lg: 6, xs: 4 },
-        borderTop: 2,
-        borderColor: "divider",
-        bgcolor: "background.paper",
-      }}
+      // sx={{
+      //   py: 2,
+      //   px: { lg: 6, xs: 4 },
+      //   borderTop: 2,
+      //   borderColor: "divider",
+      //   bgcolor: "background.paper",
+      // }}
     >
-      <Div
+      {/* <Div
         sx={{
           display: "flex",
           justifyContent: "space-between",
@@ -36,7 +36,7 @@ const Footer = () => {
           </Typography>
           <Button variant="contained">Buy Now</Button>
         </Div>
-      </Div>
+      </Div> */}
     </Div>
   );
 };

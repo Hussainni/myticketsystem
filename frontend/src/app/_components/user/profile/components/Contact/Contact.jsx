@@ -10,8 +10,10 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import InsertLinkOutlinedIcon from "@mui/icons-material/InsertLinkOutlined";
 import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import { JumboCard } from "@jumbo/components";
+import { useAuth } from "@app/_components/_core/AuthProvider/hooks";
 
 const Contacts = () => {
+  const {loggedInUser} = useAuth()
   return (
     <JumboCard title={"Contact"}>
       <List disablePadding sx={{ mb: 2 }}>
@@ -30,7 +32,7 @@ const Contacts = () => {
             }
             secondary={
               <Link variant="body1" href="#" underline="none">
-                kiley.brown@example.com
+                {loggedInUser.email}
               </Link>
             }
           />

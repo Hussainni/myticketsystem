@@ -40,11 +40,11 @@ const LoginForm = () => {
         localStorage.setItem("userID", id);
         setTimeout(() => {
           if (role === "admin") {
-            navigate("/admin-dashboard/all-tickets");
+            navigate("/admin-dashboard/overview");
           } else if (role === "employee") {
-            navigate("/employee-dashboard");
+            navigate("/employee-dashboard/overview");
           } else if (role === "support") {
-            navigate("/support-dashboard");
+            navigate("/support-agent-dashboard/overview");
           } else {
             navigate("/dashboards/sample");
           }

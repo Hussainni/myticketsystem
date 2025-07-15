@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 import { eraseCookie, getCookie, setCookie } from "@jumbo/utilities/cookies";
 import axios from "axios";
@@ -14,20 +14,43 @@ export function AuthProvider({ children }) {
 
 
   // funciton for logged in User
+  //   const fetchLoggedInUser = async () => {
+  //   setUserLoading(true);
+  //   try {
+  //     const response = await axios.get("http://localhost:3000/api/users/me",{ withCredentials: true })
+  //     if(response){
+  //       setIsAuthenticated(true)
+  //     }
+  //     setLoggedInUser(response.data)
+  //     return response.data
+  //   } catch (error) {
+  //     console.log("error message:",error);
+  //     return false
+  //   }
+  // }
 
   const fetchLoggedInUser = async () => {
-    setUserLoading(true);
-    try {
-      const response = await axios.get("http://localhost:3000/api/users/me",{ withCredentials: true })
-      setIsAuthenticated(true)
-      console.log("this is logged in user :" , response.data);
-      setLoggedInUser(response.data)
-      return response.data
-    } catch (error) {
-      console.log("error message:",error);
-      return false
+  setUserLoading(true);
+  try {
+    const response = await axios.get("http://localhost:3000/api/users/me", { withCredentials: true });
+    if (response) {
+      setIsAuthenticated(true);
     }
+    setLoggedInUser(response.data);
+    return response.data;
+  } catch (error) {
+    console.log("error message:", error);
+    return false;
+  } finally {
+    setUserLoading(false);
   }
+};
+
+
+
+  useEffect(()=>{
+  fetchLoggedInUser()
+  },[])
 
   // Fetch user data from API
   const fetchUser = async () => {
@@ -196,3 +219,5 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+

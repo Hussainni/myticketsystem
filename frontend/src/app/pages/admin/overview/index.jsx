@@ -9,12 +9,31 @@ import {
   Paper,
   CircularProgress,
   useTheme,
+  Stack,
+  Chip,
+  Divider,
 } from "@mui/material";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  LineChart,
+  Line,
+  Legend,
+} from "recharts";
+import { useAuth } from "@app/_components/_core/AuthProvider/hooks";
 
 const OverviewPage = () => {
   const [stats, setStats] = useState(null);
   const theme = useTheme();
+  const { loggedInUser } = useAuth()
 
   useEffect(() => {
     fetchStats();
@@ -43,6 +62,13 @@ const OverviewPage = () => {
 
   const COLORS = ["#1976d2", "#ff9800", "#4caf50", "#9e9e9e"];
 
+  const statusColorMap = [
+    { label: "Open", color: "#1976d2" },
+    { label: "In Progress", color: "#ff9800" },
+    { label: "Resolved", color: "#4caf50" },
+    { label: "Closed", color: "#9e9e9e" },
+  ];
+
   if (!stats) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
@@ -52,39 +78,53 @@ const OverviewPage = () => {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
       <Typography variant="h4" gutterBottom>
-        Admin Dashboard Overview
+        Internal Support Ticket & Issue Tracking System
       </Typography>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={3}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
+      <Typography variant="body1" mb={4}>
+        Hello <strong>{loggedInUser.name}</strong>!<br />
+        You've logged in as <strong>{loggedInUser.role}</strong>.<br />
+        This admin dashboard empowers you to lead the support process — oversee tickets, manage teams, and maintain a high standard of efficiency across all departments.
+      </Typography>
+
+
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, textAlign: "center" }}>
             <Typography variant="h6">Total Tickets</Typography>
-            <Typography variant="h4" color="primary">
+            <Typography variant="h5" color="primary">
               {stats.totalTickets}
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6">Open</Typography>
-            <Typography variant="h4" color="info.main">
-              {stats.statusCounts?.Open || 0}
+
+        {["Open", "In Progress", "Resolved", "Closed"].map((status, index) => (
+          <Grid item xs={12} sm={6} md={4} lg={2.4} key={status}>
+            <Paper
+              elevation={3}
+              sx={{ p: 2, borderRadius: 3, textAlign: "center", minWidth: 150 }}
+            >
+              <Typography variant="subtitle1" noWrap>
+                {status}
+              </Typography>
+              <Typography
+                variant="h6"
+                color={COLORS[index]}
+                sx={{ fontWeight: "bold" }}
+              >
+                {stats.statusCounts?.[status] || 0}
+              </Typography>
+            </Paper>
+          </Grid>
+        ))}
+
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, textAlign: "center" }}>
+            <Typography variant="subtitle1" noWrap>
+              Avg. Resolution Time
             </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6">Resolved</Typography>
-            <Typography variant="h4" color="success.main">
-              {stats.statusCounts?.Resolved || 0}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6">Average Resolution Time</Typography>
             <Typography variant="body1">
               {stats.avgResolutionTimeInDays || "N/A"} days
             </Typography>
@@ -114,6 +154,15 @@ const OverviewPage = () => {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
+            <Stack direction="row" spacing={2} justifyContent="center" mt={2} flexWrap="wrap">
+              {statusColorMap.map((item) => (
+                <Chip
+                  key={item.label}
+                  label={item.label}
+                  sx={{ backgroundColor: item.color, color: "#fff", mb: 1 }}
+                />
+              ))}
+            </Stack>
           </Paper>
         </Grid>
 
@@ -126,9 +175,9 @@ const OverviewPage = () => {
               <BarChart data={barData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="category" />
-                <YAxis />
+                <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#1976d2" />
+                <Bar dataKey="count" fill="#1976d2" barSize={30} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
@@ -140,10 +189,10 @@ const OverviewPage = () => {
               Tickets Over Time
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={lineData}>
+              <LineChart data={lineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
-                <YAxis />
+                <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Legend />
                 <Line type="monotone" dataKey="count" stroke="#1976d2" strokeWidth={2} />
