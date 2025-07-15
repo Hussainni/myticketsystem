@@ -27,7 +27,7 @@ const statusColors = {
   Closed: "default",
 };
 
-const TicketDetailsPage = () => {
+const AllTicketDetailsPage = () => {
   const { ticketId } = useParams();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
@@ -157,4 +157,4 @@ const TicketDetailsPage = () => {
   );
 };
 
-export default TicketDetailsPage;
+export default AllTicketDetailsPage;

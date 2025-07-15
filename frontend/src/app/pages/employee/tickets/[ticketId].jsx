@@ -14,6 +14,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew"; // ✅ Import back icon
 import dayjs from "dayjs";
 
 const TicketDetailPage = () => {
@@ -87,13 +88,14 @@ const TicketDetailPage = () => {
         minHeight: "100vh",
       }}
     >
-      {/* Go Back Button */}
+      {/* Go Back Button with Icon */}
       <Button
         variant="outlined"
         onClick={() => navigate(-1)}
         sx={{ mb: 2 }}
+        startIcon={<ArrowBackIosNewIcon />} // ✅ Icon here
       >
-        ⬅️ Go Back
+        Go Back
       </Button>
 
       <Typography

@@ -86,11 +86,11 @@ import { createBrowserRouter } from "react-router-dom";
 import NewPage from "@app/pages/dashboards/newpage";   // Import New Page
 import UserPage from "@app/pages/admin/users";
 import AssignTicketPage from "@app/pages/admin/Assign Tickets";
-import SearchFilterPage from "@app/pages/admin/Filter & Search";
-import AllTicketsPage from "@app/pages/admin/all-tickets/page";
+// import SearchFilterPage from "@app/pages/admin/Filter & Search";
+// import AllTicketsPage from "@app/pages/admin/all-tickets/page";
 import AgentsPage from "@app/pages/admin/Support Agents";
 import OverviewPage from "@app/pages/admin/overview";
-import TicketDetailsPage from "@app/pages/admin/all-tickets/[ticketId]";
+import TicketDetailsPage from "@app/pages/admin/tickets/[ticketId]";
 import EmployeeOverviewPage from "@app/pages/employee/overview";
 import MyTicketsPage from "@app/pages/employee/tickets";
 import TicketDetailEmployee from "@app/pages/employee/tickets/[ticketId]";
@@ -101,6 +101,8 @@ import TicketDetailAgentPage from "@app/pages/support-agent/assigned-tickets/[ti
 import FilteringAndSearchingPage from "@app/pages/support-agent/filter&search";
 import TicketDetailPage from "@app/pages/employee/tickets/[ticketId]";
 import FilterTicketDetailPage from "@app/pages/support-agent/filter&search/[ticketId]";
+import AllTicketDetailsPage from "@app/pages/admin/tickets/[ticketId]";
+import SearchAndFilterPage from "@app/pages/admin/tickets";
 
 const routes = [
   {
@@ -113,17 +115,21 @@ const routes = [
         element: <Page Component={OverviewPage} hoc={withAuth} />,
       },
       {
-        path: "/admin-dashboard/all-tickets",
-        element: <Page Component={AllTicketsPage} hoc={withAuth} />,
+        path: "/admin-dashboard/tickets",
+        element: <Page Component={SearchAndFilterPage} hoc={withAuth} />,
+      },
+      {
+        path: "/admin-dashboard/tickets/:ticketId",
+        element: <Page Component={AllTicketDetailsPage} hoc={withAuth} />,
       },
       {
         path: "/admin-dashboard/assign-tickets",
         element: <Page Component={AssignTicketPage} hoc={withAuth} />,
       },
-      {
-        path: "/admin-dashboard/filter&search",
-        element: <Page Component={SearchFilterPage} hoc={withAuth} />,
-      },
+      // {
+      //   path: "/admin-dashboard/filter&search",
+      //   element: <Page Component={SearchFilterPage} hoc={withAuth} />,
+      // },
       {
         path: "/admin-dashboard/support-agents",
         element: <Page Component={AgentsPage} hoc={withAuth} />,
@@ -132,10 +138,10 @@ const routes = [
         path: "/admin-dashboard/users",
         element: <Page Component={UserPage} hoc={withAuth} />,
       },
-      {
-        path: "/admin-dashboard/all-tickets/:ticketId",
-        element: <Page Component={TicketDetailsPage} hoc={withAuth} />,
-      },
+      // {
+      //   path: "/admin-dashboard/all-tickets/:ticketId",
+      //   element: <Page Component={TicketDetailsPage} hoc={withAuth} />,
+      // },
 
 
 

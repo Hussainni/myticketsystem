@@ -47,7 +47,6 @@ export function AuthProvider({ children }) {
 };
 
 
-
   useEffect(()=>{
   fetchLoggedInUser()
   },[])

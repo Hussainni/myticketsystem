@@ -14,14 +14,14 @@ export function getMenus() {
         label: t("Overview"),
         icon: "settings",
       },
+      // {
+      //   path: "/admin-dashboard/all-tickets",
+      //   label: t("All Tickets"),
+      //   icon: "settings",
+      // },
       {
-        path: "/admin-dashboard/all-tickets",
+        path: "/admin-dashboard/tickets",
         label: t("All Tickets"),
-        icon: "settings",
-      },
-      {
-        path: "/admin-dashboard/filter&search",
-        label: t("Filter & search"),
         icon: "settings",
       },
       {

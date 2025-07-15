@@ -1,5 +1,3 @@
-// /pages/admin-dashboard/search&filter/index.jsx
-
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -17,6 +15,7 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import axios from "axios";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate hook
 
 const statusColors = {
   Open: "primary",
@@ -36,6 +35,8 @@ const SearchAndFilterPage = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [users, setUsers] = useState([]);
+
+  const navigate = useNavigate(); // ✅ initialize navigate
 
   useEffect(() => {
     fetchTickets();
@@ -113,6 +114,7 @@ const SearchAndFilterPage = () => {
 
       <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: 3 }}>
         <Grid container spacing={2}>
+          {/* Filters */}
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               label="Search by Title or ID"
@@ -162,7 +164,11 @@ const SearchAndFilterPage = () => {
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth>
               <InputLabel>Assigned To</InputLabel>
-              <Select value={assignedUser} onChange={(e) => setAssignedUser(e.target.value)} label="Assigned To">
+              <Select
+                value={assignedUser}
+                onChange={(e) => setAssignedUser(e.target.value)}
+                label="Assigned To"
+              >
                 <MenuItem value="">All</MenuItem>
                 {users.map((user) => (
                   <MenuItem key={user._id} value={user._id}>
@@ -208,13 +214,24 @@ const SearchAndFilterPage = () => {
         </Grid>
       </Paper>
 
+      {/* Ticket Cards */}
       {filteredTickets.length === 0 ? (
         <Typography>No tickets match the filter/search.</Typography>
       ) : (
         <Grid container spacing={2}>
           {filteredTickets.map((ticket) => (
             <Grid item xs={12} md={6} lg={4} key={ticket._id}>
-              <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
+              <Paper
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  boxShadow: 3,
+                  cursor: "pointer",
+                  transition: "0.3s",
+                  "&:hover": { boxShadow: 6, backgroundColor: "#f9f9f9" },
+                }}
+                onClick={() => navigate(`/admin-dashboard/tickets/${ticket._id}`)} // ✅ navigate on click
+              >
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                   <Typography variant="h6" color="primary">
                     {ticket.title}
