@@ -15,7 +15,7 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import axios from "axios";
 import dayjs from "dayjs";
-import { useNavigate } from "react-router-dom"; // ✅ import navigate hook
+import { useNavigate } from "react-router-dom";
 
 const statusColors = {
   Open: "primary",
@@ -36,7 +36,7 @@ const SearchAndFilterPage = () => {
   const [endDate, setEndDate] = useState("");
   const [users, setUsers] = useState([]);
 
-  const navigate = useNavigate(); // ✅ initialize navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTickets();
@@ -107,14 +107,16 @@ const SearchAndFilterPage = () => {
   };
 
   return (
-    <Box p={4}>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      {/* Page Title */}
       <Typography variant="h4" mb={3}>
         Search & Filter Tickets
       </Typography>
 
+      {/* Filters Panel */}
       <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: 3 }}>
         <Grid container spacing={2}>
-          {/* Filters */}
+          {/* Search Field */}
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               label="Search by Title or ID"
@@ -124,6 +126,7 @@ const SearchAndFilterPage = () => {
             />
           </Grid>
 
+          {/* Status Filter */}
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
@@ -137,6 +140,7 @@ const SearchAndFilterPage = () => {
             </FormControl>
           </Grid>
 
+          {/* Category Filter */}
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
@@ -149,6 +153,7 @@ const SearchAndFilterPage = () => {
             </FormControl>
           </Grid>
 
+          {/* Priority Filter */}
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
               <InputLabel>Priority</InputLabel>
@@ -161,6 +166,7 @@ const SearchAndFilterPage = () => {
             </FormControl>
           </Grid>
 
+          {/* Assigned User Filter */}
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth>
               <InputLabel>Assigned To</InputLabel>
@@ -179,6 +185,7 @@ const SearchAndFilterPage = () => {
             </FormControl>
           </Grid>
 
+          {/* Date Range Filters */}
           <Grid item xs={6} sm={6} md={3}>
             <TextField
               type="date"
@@ -189,7 +196,6 @@ const SearchAndFilterPage = () => {
               onChange={(e) => setStartDate(e.target.value)}
             />
           </Grid>
-
           <Grid item xs={6} sm={6} md={3}>
             <TextField
               type="date"
@@ -201,6 +207,7 @@ const SearchAndFilterPage = () => {
             />
           </Grid>
 
+          {/* Actions */}
           <Grid item xs={12}>
             <Box display="flex" gap={2} flexWrap="wrap">
               <Button variant="contained" onClick={handleFilter}>
@@ -214,9 +221,11 @@ const SearchAndFilterPage = () => {
         </Grid>
       </Paper>
 
-      {/* Ticket Cards */}
+      {/* Ticket Results */}
       {filteredTickets.length === 0 ? (
-        <Typography>No tickets match the filter/search.</Typography>
+        <Typography variant="body1" color="text.secondary">
+          No tickets match the filter/search.
+        </Typography>
       ) : (
         <Grid container spacing={2}>
           {filteredTickets.map((ticket) => (
@@ -228,12 +237,15 @@ const SearchAndFilterPage = () => {
                   boxShadow: 3,
                   cursor: "pointer",
                   transition: "0.3s",
-                  "&:hover": { boxShadow: 6, backgroundColor: "#f9f9f9" },
+                  "&:hover": {
+                    boxShadow: 6,
+                    backgroundColor: "#f9f9f9",
+                  },
                 }}
-                onClick={() => navigate(`/admin-dashboard/tickets/${ticket._id}`)} // ✅ navigate on click
+                onClick={() => navigate(`/admin-dashboard/tickets/${ticket._id}`)}
               >
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                  <Typography variant="h6" color="primary">
+                  <Typography variant="h6" color="primary" noWrap>
                     {ticket.title}
                   </Typography>
                   <Chip

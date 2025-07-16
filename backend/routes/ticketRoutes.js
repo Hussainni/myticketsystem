@@ -8,7 +8,6 @@ import {
   getEmployeeTicketStats,
   getSupportAgentStats,
 } from "../controllers/ticketController.js";
-// import { upload } from "../middleware/uploadMiddleware.js";
 
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
@@ -28,10 +27,5 @@ router.patch("/:id/notes", protect, authorizeRoles("admin", "support"), updateIn
 router.get("/stats/employee",protect, authorizeRoles("employee"), getEmployeeTicketStats);
 router.get("/stats/support-agent",protect, authorizeRoles("support"), getSupportAgentStats);
 
-
-
-//optional
-// router.post("/", protect, authorizeRoles("employee"), upload.single("attachment"), createTicket
-// );
 
 export default router;

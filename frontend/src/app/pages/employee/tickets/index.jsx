@@ -15,20 +15,27 @@ import {
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
-const statusColors = {
+// ========================
+// Constants
+// ========================
+const STATUS_COLORS = {
   Open: "primary",
   "In Progress": "warning",
   Resolved: "success",
   Closed: "default",
 };
 
-const statusOptions = ["Open", "In Progress", "Resolved", "Closed"];
-const categoryOptions = ["IT", "HR", "Office"];
+const STATUS_OPTIONS = ["Open", "In Progress", "Resolved", "Closed"];
+const CATEGORY_OPTIONS = ["IT", "HR", "Office"];
 
+// ========================
+// Component
+// ========================
 const MyTicketsPage = () => {
   const [tickets, setTickets] = useState([]);
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [filters, setFilters] = useState({
     status: "",
     category: "",
@@ -39,24 +46,30 @@ const MyTicketsPage = () => {
 
   const navigate = useNavigate();
 
+  // ========================
+  // Fetch Tickets
+  // ========================
   useEffect(() => {
+    const fetchMyTickets = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/api/tickets/my", {
+          withCredentials: true,
+        });
+        setTickets(res.data);
+        setFilteredTickets(res.data);
+      } catch (err) {
+        console.error("Error fetching tickets:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchMyTickets();
   }, []);
 
-  const fetchMyTickets = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/tickets/my", {
-        withCredentials: true,
-      });
-      setTickets(res.data);
-      setFilteredTickets(res.data);
-    } catch (err) {
-      console.error("Error fetching employee tickets:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ========================
+  // Filter Handlers
+  // ========================
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
@@ -78,6 +91,7 @@ const MyTicketsPage = () => {
 
       return matchStatus && matchCategory && matchSearch && matchStartDate && matchEndDate;
     });
+
     setFilteredTickets(result);
   };
 
@@ -86,13 +100,19 @@ const MyTicketsPage = () => {
     setFilteredTickets(tickets);
   };
 
+  // ========================
+  // Render
+  // ========================
   return (
     <Box p={{ xs: 2, md: 4 }} sx={{ backgroundColor: "#f5f7fa", minHeight: "100vh" }}>
+      {/* Heading */}
       <Typography variant="h4" mb={4} fontWeight={600} color="primary.main">
         🎟️ My Tickets
       </Typography>
 
+      {/* =================== */}
       {/* Filters */}
+      {/* =================== */}
       <Paper sx={{ p: 3, borderRadius: 3, mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
@@ -105,7 +125,7 @@ const MyTicketsPage = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="">All</MenuItem>
-              {statusOptions.map((status) => (
+              {STATUS_OPTIONS.map((status) => (
                 <MenuItem key={status} value={status}>
                   {status}
                 </MenuItem>
@@ -123,7 +143,7 @@ const MyTicketsPage = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="">All</MenuItem>
-              {categoryOptions.map((cat) => (
+              {CATEGORY_OPTIONS.map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}
                 </MenuItem>
@@ -176,13 +196,15 @@ const MyTicketsPage = () => {
         </Grid>
       </Paper>
 
+      {/* =================== */}
       {/* Ticket Cards */}
+      {/* =================== */}
       {loading ? (
         <Box display="flex" justifyContent="center" mt={5}>
           <CircularProgress />
         </Box>
       ) : filteredTickets.length === 0 ? (
-        <Typography>No tickets match your criteria.</Typography>
+        <Typography variant="body1">No tickets match your criteria.</Typography>
       ) : (
         <Grid container spacing={3}>
           {filteredTickets.map((ticket) => (
@@ -204,7 +226,7 @@ const MyTicketsPage = () => {
                   </Typography>
                   <Chip
                     label={ticket.status}
-                    color={statusColors[ticket.status] || "default"}
+                    color={STATUS_COLORS[ticket.status] || "default"}
                     size="small"
                   />
                 </Box>
@@ -227,7 +249,8 @@ const MyTicketsPage = () => {
                       WebkitBoxOrient: "vertical",
                     }}
                   >
-                    <strong>Description:</strong> {ticket.description || "No description provided."}
+                    <strong>Description:</strong>{" "}
+                    {ticket.description || "No description provided."}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Created:</strong> {dayjs(ticket.createdAt).format("YYYY-MM-DD")}
@@ -243,3 +266,4 @@ const MyTicketsPage = () => {
 };
 
 export default MyTicketsPage;
+

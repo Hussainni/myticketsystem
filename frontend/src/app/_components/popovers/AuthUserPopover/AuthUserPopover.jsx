@@ -35,7 +35,7 @@ const AuthUserPopover = () => {
       <JumboDdPopover
         triggerButton={
           <Avatar
-            src={authUser?.profile_pic}
+            src={loggedInUser?.profileImage}
             sizes={"small"}
             sx={{ boxShadow: 23, cursor: "pointer" }}
           />
@@ -51,7 +51,7 @@ const AuthUserPopover = () => {
           }}
         >
           <Avatar
-            src={authUser?.profile_pic}
+            src={loggedInUser?.profileImage}
             alt={loggedInUser.name}
             sx={{ width: 60, height: 60, mb: 2 }}
           />

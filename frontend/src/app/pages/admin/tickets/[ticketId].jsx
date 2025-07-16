@@ -1,5 +1,3 @@
-// /src/app/pages/admin-dashboard/all-tickets/[ticketId].jsx
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -82,25 +80,28 @@ const AllTicketDetailsPage = () => {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      {/* Back Button */}
       <Button
         startIcon={<ArrowBackIcon />}
         variant="outlined"
         onClick={() => navigate(-1)}
-        sx={{ mb: 2 }}
+        sx={{ mb: 3 }}
       >
         Back
       </Button>
 
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h5" fontWeight={600}>
+      {/* Ticket Details */}
+      <Paper elevation={3} sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, mb: 4 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
+          <Typography variant="h5" fontWeight={600} sx={{ mr: 2 }}>
             {ticket.title}
           </Typography>
           <Chip
             label={status}
             color={statusColors[status] || "default"}
             size="medium"
+            sx={{ mt: { xs: 2, sm: 0 } }}
           />
         </Box>
 
@@ -110,10 +111,12 @@ const AllTicketDetailsPage = () => {
 
         <Divider sx={{ my: 2 }} />
 
+        {/* Description */}
         <Typography variant="body1" sx={{ mb: 2 }}>
           {ticket.description}
         </Typography>
 
+        {/* Ticket Info Stack */}
         <Stack spacing={1}>
           <Typography variant="body2">
             <strong>Category:</strong> {ticket.category}
@@ -129,14 +132,13 @@ const AllTicketDetailsPage = () => {
           </Typography>
           <Typography variant="body2">
             <strong>Created By:</strong> {ticket.createdBy?.name || "N/A"}
-            <strong>Role:</strong> {ticket.createdBy?.role || "N/A"}
           </Typography>
-          
           <Typography variant="body2">
             <strong>Assigned To:</strong> {ticket.assignedTo?.name || "Unassigned"}
           </Typography>
         </Stack>
 
+        {/* Status Update */}
         <FormControl fullWidth sx={{ mt: 3 }}>
           <InputLabel>Update Status</InputLabel>
           <Select
@@ -152,6 +154,7 @@ const AllTicketDetailsPage = () => {
         </FormControl>
       </Paper>
 
+      {/* Comment Section */}
       <CommentSection ticketId={ticket._id} />
     </Box>
   );

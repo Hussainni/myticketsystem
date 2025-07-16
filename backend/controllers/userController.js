@@ -1,5 +1,7 @@
 import User from "../models/User.model.js";
 import bcrypt from "bcryptjs"
+import cloudinary from "../config/cloudinary.js"; 
+import fs from "fs";
 
 export const getCurrentUser = (req, res) => {
   if (!req.user) {
@@ -7,6 +9,7 @@ export const getCurrentUser = (req, res) => {
   }
   res.status(200).json(req.user);
 };
+
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -16,6 +19,7 @@ export const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch users", error: err.message });
   }
 };
+
 
 export const updateUserRole = async (req, res) => {
   const { role } = req.body;
@@ -47,6 +51,7 @@ export const getSupportAgents = async (req, res) => {
     res.status(500).json({ message: "Error fetching support agents", error: err.message });
   }
 };
+
 
 export const updateProfile = async (req, res) => {
   try {
@@ -106,4 +111,45 @@ export const changePassword = async (req, res) => {
     return res.status(500).json({ message: "Server error while updating password." });
   }
 };
+
+
+// export const uploadImage = async (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({ error: "No file uploaded" });
+//     }
+
+//     const userId = req.user._id;
+//     const imagePath = `/profile-images/${req.file.filename}`;
+
+//     const updatedUser = await User.findByIdAndUpdate(
+//       userId,
+//       { profileImage: imagePath },
+//       { new: true }
+//     );
+
+//     res.json({ message: "Profile image updated", imagePath });
+//   } catch (err) {
+//     console.error("Error uploading profile image:", err);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
  
+
+export const uploadImage = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const imageUrl = req.file.path;  
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profileImage: imageUrl },
+      { new: true }
+    );
+
+    res.json({ message: "Profile image updated", imageUrl });
+  } catch (err) {
+    console.error("Cloudinary upload error:", err);
+    res.status(500).json({ message: "Image upload failed" });
+  }
+};

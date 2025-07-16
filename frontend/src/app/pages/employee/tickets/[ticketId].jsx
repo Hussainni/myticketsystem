@@ -14,7 +14,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew"; // ✅ Import back icon
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import dayjs from "dayjs";
 
 const TicketDetailPage = () => {
@@ -24,9 +24,11 @@ const TicketDetailPage = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Fetch ticket and comments
   useEffect(() => {
     fetchTicket();
     fetchComments();
@@ -81,41 +83,30 @@ const TicketDetailPage = () => {
   }
 
   return (
-    <Box
-      sx={{
-        p: { xs: 2, md: 4 },
-        backgroundColor: "#f5f7fa",
-        minHeight: "100vh",
-      }}
-    >
-      {/* Go Back Button with Icon */}
+    <Box sx={{ p: { xs: 2, md: 4 }, backgroundColor: "#f5f7fa", minHeight: "100vh" }}>
+      {/* Back Button */}
       <Button
         variant="outlined"
+        startIcon={<ArrowBackIosNewIcon />}
         onClick={() => navigate(-1)}
         sx={{ mb: 2 }}
-        startIcon={<ArrowBackIosNewIcon />} // ✅ Icon here
       >
         Go Back
       </Button>
 
+      {/* Header */}
       <Typography
         variant={isMobile ? "h5" : "h4"}
+        fontWeight={600}
         gutterBottom
         color="primary.main"
-        fontWeight={600}
       >
         🎫 Ticket Details
       </Typography>
 
-      <Paper
-        sx={{
-          p: { xs: 2, md: 4 },
-          borderRadius: 4,
-          mb: 4,
-          boxShadow: 3,
-        }}
-      >
-        <Typography variant="h6" gutterBottom color="text.primary">
+      {/* Ticket Details */}
+      <Paper sx={{ p: { xs: 2, md: 4 }, borderRadius: 4, mb: 4 }}>
+        <Typography variant="h6" color="text.primary" gutterBottom>
           {ticket.title}
         </Typography>
 
@@ -152,22 +143,12 @@ const TicketDetailPage = () => {
         </Typography>
       </Paper>
 
-      <Typography
-        variant={isMobile ? "h6" : "h5"}
-        gutterBottom
-        color="text.primary"
-      >
+      {/* Comments Section */}
+      <Typography variant={isMobile ? "h6" : "h5"} gutterBottom>
         💬 Comments
       </Typography>
 
-      <Paper
-        sx={{
-          p: { xs: 2, md: 3 },
-          borderRadius: 4,
-          mb: 4,
-          backgroundColor: "#ffffff",
-        }}
-      >
+      <Paper sx={{ p: { xs: 2, md: 3 }, borderRadius: 4, mb: 4, backgroundColor: "#fff" }}>
         <Stack spacing={2}>
           {comments.map((comment) => (
             <Box
@@ -179,13 +160,13 @@ const TicketDetailPage = () => {
                 backgroundColor: "#f9f9f9",
               }}
             >
-              <Typography variant="body2" fontWeight="bold">
+              <Typography variant="body2" fontWeight={600}>
                 {(comment.userId && comment.userId.name) || "Unknown User"} —{" "}
                 {dayjs(comment.createdAt).format("YYYY-MM-DD HH:mm")}
               </Typography>
               <Typography variant="body1">{comment.text}</Typography>
               {comment.attachment && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" mt={1}>
                   📎 Attachment: {comment.attachment}
                 </Typography>
               )}
@@ -193,6 +174,7 @@ const TicketDetailPage = () => {
           ))}
         </Stack>
 
+        {/* Add Comment */}
         <Box mt={4}>
           <TextField
             label="Add a comment"
@@ -201,7 +183,6 @@ const TicketDetailPage = () => {
             fullWidth
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            variant="outlined"
           />
           <Button
             variant="contained"

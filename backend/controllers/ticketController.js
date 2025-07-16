@@ -62,7 +62,7 @@ export const getAllTickets = async (req, res) => {
 
 export const getTicketById = async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id).populate("createdBy", "name email role").populate("assignedTo", "name email");
+    const ticket = await Ticket.findById(req.params.id).populate("createdBy", "name email role").populate("assignedTo", "name email role");
 
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 
@@ -131,7 +131,6 @@ export const updateInternalNotes = async (req, res) => {
   }
 };
  
-
 
 export const getTicketStats = async (req, res) => {
   try {

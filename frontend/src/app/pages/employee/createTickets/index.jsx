@@ -1,5 +1,3 @@
-// /pages/employee-dashboard/create-tickets.jsx
-
 import React, { useState } from "react";
 import axios from "axios";
 import {
@@ -12,6 +10,8 @@ import {
   CircularProgress,
   Stack,
   Alert,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 const categories = ["IT", "HR", "Office"];
@@ -28,6 +28,9 @@ const CreateTicketPage = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -37,6 +40,7 @@ const CreateTicketPage = () => {
     setLoading(true);
     setSuccessMessage("");
     setErrorMessage("");
+
     try {
       await axios.post("http://localhost:3000/api/tickets", form, {
         withCredentials: true,
@@ -52,44 +56,58 @@ const CreateTicketPage = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, backgroundColor: "#f5f7fa", minHeight: "100vh" }}>
-      <Typography variant="h4" mb={3} color="primary.main" fontWeight={600}>
+      <Typography
+        variant={isMobile ? "h5" : "h4"}
+        mb={3}
+        fontWeight={600}
+        color="primary.main"
+      >
         ✨ Create New Ticket
       </Typography>
 
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 4, maxWidth: 600, mx: "auto" }}>
+      <Paper
+        elevation={3}
+        sx={{
+          p: { xs: 3, md: 4 },
+          borderRadius: 4,
+          maxWidth: 600,
+          mx: "auto",
+          backgroundColor: "#ffffff",
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <Stack spacing={3}>
             <TextField
               name="title"
               label="Ticket Title"
               fullWidth
+              required
               variant="outlined"
               value={form.title}
               onChange={handleChange}
-              required
             />
 
             <TextField
               name="description"
               label="Description"
               fullWidth
+              required
               multiline
               rows={4}
               variant="outlined"
               value={form.description}
               onChange={handleChange}
-              required
             />
 
             <TextField
               name="category"
               label="Category"
               select
+              required
               fullWidth
               variant="outlined"
               value={form.category}
               onChange={handleChange}
-              required
             >
               {categories.map((cat) => (
                 <MenuItem key={cat} value={cat}>
@@ -102,15 +120,15 @@ const CreateTicketPage = () => {
               name="priority"
               label="Priority"
               select
+              required
               fullWidth
               variant="outlined"
               value={form.priority}
               onChange={handleChange}
-              required
             >
-              {priorities.map((prio) => (
-                <MenuItem key={prio} value={prio}>
-                  {prio}
+              {priorities.map((priority) => (
+                <MenuItem key={priority} value={priority}>
+                  {priority}
                 </MenuItem>
               ))}
             </TextField>
@@ -124,6 +142,8 @@ const CreateTicketPage = () => {
               color="primary"
               size="large"
               disabled={loading}
+              fullWidth={isMobile}
+              sx={{ py: 1.5 }}
             >
               {loading ? <CircularProgress size={24} color="inherit" /> : "Create Ticket"}
             </Button>
@@ -135,3 +155,4 @@ const CreateTicketPage = () => {
 };
 
 export default CreateTicketPage;
+

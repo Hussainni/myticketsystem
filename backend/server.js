@@ -28,10 +28,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/comments", commentRoutes);
-app.use("/uploads", express.static(path.resolve("uploads")));
-
-
-
 
 connectDB
 

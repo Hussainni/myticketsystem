@@ -8,6 +8,8 @@ import {
   CircularProgress,
   Stack,
   Chip,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   PieChart,
@@ -26,9 +28,8 @@ import {
 } from "recharts";
 import { useAuth } from "@app/_components/_core/AuthProvider/hooks";
 
-// === Constants ===
+// ===== Constants =====
 const COLORS = ["#1976d2", "#ff9800", "#4caf50", "#9e9e9e"];
-
 const statusColorMap = [
   { label: "Open", color: COLORS[0] },
   { label: "In Progress", color: COLORS[1] },
@@ -40,6 +41,8 @@ const SupportAgentOverviewPage = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const { loggedInUser } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // === Fetch Stats ===
   useEffect(() => {
@@ -55,7 +58,6 @@ const SupportAgentOverviewPage = () => {
         setLoading(false);
       }
     };
-
     fetchStats();
   }, []);
 
@@ -73,58 +75,63 @@ const SupportAgentOverviewPage = () => {
     name: item.label,
     value: stats.statusCounts?.[item.label] || 0,
   }));
-
   const barData = stats.categoryCounts || [];
   const lineData = stats.ticketsOverTime || [];
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
-      {/* Header */}
-      <Typography variant="h4" gutterBottom color="primary.main">
+    <Box sx={{ p: { xs: 2, md: 4 }, backgroundColor: "#f5f7fa", minHeight: "100vh" }}>
+      {/* Heading */}
+      <Typography
+        variant={isMobile ? "h5" : "h4"}
+        gutterBottom
+        color="primary.main"
+        fontWeight={600}
+      >
         🛠️ Support Agent Overview
       </Typography>
+
       <Typography variant="body1" mb={4}>
         Hello <strong>{loggedInUser.name}</strong>!<br />
-        You're logged in as <strong>{loggedInUser.role}</strong>.<br />
-        Welcome to your Dashboard — a place to lead, resolve issues efficiently, and grow in your role every day.
+        You’re logged in as <strong>{loggedInUser.role}</strong>.<br />
+        This dashboard helps you manage, resolve, and analyze your assigned tickets efficiently.
       </Typography>
 
-      {/* Stats Cards */}
-      <Grid container spacing={3} mb={4}>
-        {/* Total Tickets */}
-        <Grid item xs={12} sm={6} md={4} lg={2.4}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, textAlign: "center" }}>
-            <Typography variant="h6">Total Tickets</Typography>
-            <Typography variant="h5" color="primary">{stats.totalTickets}</Typography>
-          </Paper>
-        </Grid>
-
-        {/* Status Breakdown */}
-        {statusColorMap.map((status, index) => (
-          <Grid item xs={12} sm={6} md={4} lg={2.4} key={status.label}>
-            <Paper elevation={3} sx={{ p: 2, borderRadius: 3, textAlign: "center" }}>
-              <Typography variant="subtitle1">{status.label}</Typography>
-              <Typography
-                variant="h6"
-                sx={{ color: status.color, fontWeight: "bold" }}
+      {/* Stat Cards */}
+      <Grid container spacing={2} mb={4}>
+        {[{ label: "Total Tickets", value: stats.totalTickets, color: COLORS[0] }]
+          .concat(statusColorMap.map((s) => ({
+            label: s.label,
+            value: stats.statusCounts?.[s.label] || 0,
+            color: s.color,
+          })))
+          .concat([{ label: "Avg. Resolution", value: `${stats.avgResolutionTimeInDays || "N/A"} days`, color: "#000" }])
+          .map((item, index) => (
+            <Grid item xs={6} sm={4} md={3} lg={2.4} key={index}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  textAlign: "center",
+                  height: "100%",
+                }}
               >
-                {stats.statusCounts?.[status.label] || 0}
-              </Typography>
-            </Paper>
-          </Grid>
-        ))}
-
-        {/* Avg. Resolution Time */}
-        <Grid item xs={12} sm={6} md={4} lg={2.4}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 3, textAlign: "center" }}>
-            <Typography variant="subtitle1" noWrap>Avg. Resolution Time</Typography>
-            <Typography variant="body1">
-              {stats.avgResolutionTimeInDays !== "N/A"
-                ? `${stats.avgResolutionTimeInDays} days`
-                : "N/A"}
-            </Typography>
-          </Paper>
-        </Grid>
+                <Typography
+                  variant="subtitle2"
+                  noWrap
+                  sx={{ fontSize: isMobile ? "0.8rem" : "0.95rem" }}
+                >
+                  {item.label}
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{ color: item.color, fontWeight: 600, mt: 1 }}
+                >
+                  {item.value}
+                </Typography>
+              </Paper>
+            </Grid>
+          ))}
       </Grid>
 
       {/* Charts Section */}
@@ -151,18 +158,18 @@ const SupportAgentOverviewPage = () => {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-            <Stack direction="row" spacing={2} justifyContent="center" mt={2} flexWrap="wrap">
-              {statusColorMap.map((item) => (
+            <Stack direction="row" spacing={1} justifyContent="center" mt={2} flexWrap="wrap">
+              {statusColorMap.map((s) => (
                 <Chip
-                  key={item.label}
-                  label={item.label}
+                  key={s.label}
+                  label={s.label}
+                  size="small"
                   sx={{
-                    backgroundColor: item.color,
+                    backgroundColor: s.color,
                     color: "#fff",
-                    mb: 1,
+                    m: 0.5,
                     fontSize: "0.75rem",
                   }}
-                  size="small"
                 />
               ))}
             </Stack>
@@ -174,7 +181,7 @@ const SupportAgentOverviewPage = () => {
           <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
             <Typography variant="h6" gutterBottom>Tickets by Category</Typography>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={barData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <BarChart data={barData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="category" />
                 <YAxis allowDecimals={false} />
@@ -190,7 +197,7 @@ const SupportAgentOverviewPage = () => {
           <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
             <Typography variant="h6" gutterBottom>Tickets Over Time</Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={lineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <LineChart data={lineData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis allowDecimals={false} />
@@ -207,3 +214,4 @@ const SupportAgentOverviewPage = () => {
 };
 
 export default SupportAgentOverviewPage;
+

@@ -1,5 +1,3 @@
-// /pages/admin-dashboard/users/index.jsx
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -71,42 +69,44 @@ const UserPage = () => {
   };
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      {/* Header */}
       <Typography variant="h4" gutterBottom>
         Manage Users
       </Typography>
 
-      <Box mb={4} component={Paper} elevation={3} p={3} borderRadius={3}>
+      {/* Create New User Section */}
+      <Paper elevation={3} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
           Create New User
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <TextField
-              fullWidth
               label="Name"
+              fullWidth
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
             />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <TextField
-              fullWidth
               label="Email"
+              fullWidth
               value={newUser.email}
               onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
             />
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid item xs={12} sm={6} md={2}>
             <TextField
-              fullWidth
               label="Password"
               type="password"
+              fullWidth
               value={newUser.password}
               onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
             />
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
               <InputLabel>Role</InputLabel>
               <Select
@@ -122,9 +122,8 @@ const UserPage = () => {
           </Grid>
           <Grid item xs={12} md={2}>
             <Button
-              variant="contained"
-              color="primary"
               fullWidth
+              variant="contained"
               sx={{ height: "100%" }}
               onClick={handleCreateUser}
             >
@@ -132,20 +131,25 @@ const UserPage = () => {
             </Button>
           </Grid>
         </Grid>
-      </Box>
+      </Paper>
 
+      {/* Users List */}
       <Grid container spacing={3}>
         {users.map((user) => (
-          <Grid item xs={12} md={6} lg={4} key={user._id}>
-            <Card sx={{ borderRadius: 4, boxShadow: 3, p: 3, bgcolor: "#f7f7f7" }}>
+          <Grid item xs={12} sm={6} md={4} key={user._id}>
+            <Card sx={{ borderRadius: 3, p: 2, boxShadow: 3, bgcolor: "#f9f9f9" }}>
               <CardContent>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Avatar sx={{ bgcolor: "primary.main" }}>
                     <GroupIcon />
                   </Avatar>
                   <Box>
-                    <Typography variant="subtitle1" fontWeight={600}>{user.name}</Typography>
-                    <Typography variant="body2" color="text.secondary">{user.email}</Typography>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {user.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {user.email}
+                    </Typography>
                     <FormControl fullWidth size="small" sx={{ mt: 1 }}>
                       <InputLabel>Role</InputLabel>
                       <Select
@@ -170,6 +174,7 @@ const UserPage = () => {
         ))}
       </Grid>
 
+      {/* Snackbar Notification */}
       <Snackbar
         open={!!successMessage}
         autoHideDuration={4000}
