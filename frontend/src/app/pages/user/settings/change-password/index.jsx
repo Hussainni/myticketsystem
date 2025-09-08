@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
   JumboForm,
   JumboOutlinedInput,
@@ -17,6 +16,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { SettingHeader } from "@app/_components/user/settings";
 import { toast } from "react-toastify";
 import * as yup from "yup";
+import API from "../../../admin/api/api"; // ✅ use centralized API instance
 
 // ✅ Validation Schema
 const validationSchema = yup.object({
@@ -33,10 +33,9 @@ const validationSchema = yup.object({
 
 const ChangePassword = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
-  const [success, setSuccess] = React.useState("");
-  const [showPasswords, setShowPasswords] = React.useState({
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ type: "", message: "" });
+  const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
     confirm: false,
@@ -44,114 +43,80 @@ const ChangePassword = () => {
 
   const handlePasswordChange = async (data) => {
     setLoading(true);
-    setError("");
-    setSuccess("");
+    setAlert({ type: "", message: "" });
 
     try {
-      const response = await axios.put(
-        "http://localhost:3000/api/users/change-password",
-        {
-          currentPassword: data.currentPassword,
-          newPassword: data.newPassword,
-          confirmNewPassword: data.confirmNewPassword,
-        },
-        { withCredentials: true }
-      );
+      await API.put("/api/users/change-password", data);
 
-      setSuccess("Password changed successfully!");
+      setAlert({ type: "success", message: "Password changed successfully!" });
+      toast.success("Password changed successfully!");
 
-      toast.success("Password changed successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-
-      setTimeout(() => {
-        navigate("/admin-dashboard/all-tickets");
-      }, 2000);
+      setTimeout(() => navigate("/admin-dashboard/all-tickets"), 2000);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to change password";
-      setError(errorMessage);
-
-      toast.error(errorMessage, {
-        position: "top-right",
-        autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      const errorMessage =
+        error.response?.data?.message || "Failed to change password";
+      setAlert({ type: "error", message: errorMessage });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const togglePasswordVisibility = (field) => {
-    setShowPasswords((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   return (
     <>
-      <SettingHeader title={"Change Password"} />
+      <SettingHeader title="Change Password" />
 
       <JumboCard
-        title={"Update Your Password"}
+        title="Update Your Password"
         contentWrapper
         sx={{ maxWidth: 600, mx: "auto", mt: 2 }}
       >
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+        {alert.message && (
+          <Alert severity={alert.type} sx={{ mb: 2 }}>
+            {alert.message}
+          </Alert>
+        )}
 
         <JumboForm
           validationSchema={validationSchema}
           onSubmit={handlePasswordChange}
-          onChange={() => {}}
         >
           <Stack spacing={3}>
-            <JumboOutlinedInput
-              fieldName="currentPassword"
-              label="Current Password"
-              type={showPasswords.current ? "text" : "password"}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton onClick={() => togglePasswordVisibility("current")}>
-                    {showPasswords.current ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
+            {["currentPassword", "newPassword", "confirmNewPassword"].map(
+              (field, idx) => {
+                const labels = [
+                  "Current Password",
+                  "New Password",
+                  "Confirm New Password",
+                ];
+                const keys = ["current", "new", "confirm"];
+                return (
+                  <JumboOutlinedInput
+                    key={field}
+                    fieldName={field}
+                    label={labels[idx]}
+                    type={showPasswords[keys[idx]] ? "text" : "password"}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => togglePasswordVisibility(keys[idx])}
+                        >
+                          {showPasswords[keys[idx]] ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  />
+                );
               }
-            />
-
-            <JumboOutlinedInput
-              fieldName="newPassword"
-              label="New Password"
-              type={showPasswords.new ? "text" : "password"}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton onClick={() => togglePasswordVisibility("new")}>
-                    {showPasswords.new ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-
-            <JumboOutlinedInput
-              fieldName="confirmNewPassword"
-              label="Confirm New Password"
-              type={showPasswords.confirm ? "text" : "password"}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton onClick={() => togglePasswordVisibility("confirm")}>
-                    {showPasswords.confirm ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
+            )}
 
             <LoadingButton
               fullWidth

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -27,13 +26,14 @@ import {
   Legend,
 } from "recharts";
 import { useAuth } from "@app/_components/_core/AuthProvider/hooks";
+import API from "../../admin/api/api";
 
 // ========================
 // Constants
 // ========================
 const COLORS = ["#1976d2", "#ff9800", "#4caf50", "#9e9e9e"];
 
-const statusColorMap = [
+const STATUS_COLOR_MAP = [
   { label: "Open", color: COLORS[0] },
   { label: "In Progress", color: COLORS[1] },
   { label: "Resolved", color: COLORS[2] },
@@ -53,10 +53,8 @@ const EmployeeOverviewPage = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/tickets/stats/employee", {
-          withCredentials: true,
-        });
-        setStats(res.data);
+        const { data } = await API.get("/api/tickets/stats/employee");
+        setStats(data);
       } catch (err) {
         console.error("Error fetching stats:", err);
       }
@@ -78,7 +76,7 @@ const EmployeeOverviewPage = () => {
   // ========================
   // Data Preparation
   // ========================
-  const pieData = statusColorMap.map((item) => ({
+  const pieData = STATUS_COLOR_MAP.map((item) => ({
     name: item.label,
     value: stats?.statusCounts?.[item.label] || 0,
   }));
@@ -88,7 +86,7 @@ const EmployeeOverviewPage = () => {
 
   const metricCards = [
     { label: "Total Tickets", value: stats.totalTickets, color: COLORS[0] },
-    ...statusColorMap.map((s) => ({
+    ...STATUS_COLOR_MAP.map((s) => ({
       label: s.label,
       value: stats.statusCounts?.[s.label] || 0,
       color: s.color,
@@ -178,7 +176,7 @@ const EmployeeOverviewPage = () => {
               </PieChart>
             </ResponsiveContainer>
             <Stack direction="row" spacing={1} justifyContent="center" mt={2} flexWrap="wrap">
-              {statusColorMap.map((s) => (
+              {STATUS_COLOR_MAP.map((s) => (
                 <Chip
                   key={s.label}
                   label={s.label}
@@ -237,4 +235,3 @@ const EmployeeOverviewPage = () => {
 };
 
 export default EmployeeOverviewPage;
-

@@ -1,7 +1,6 @@
 // /pages/support-agent-dashboard/filtering&searching.jsx
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -15,27 +14,31 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import API from "../../admin/api/api";
 
-const statusOptions = ["Open", "In Progress", "Resolved", "Closed"];
-const priorityOptions = ["Low", "Medium", "High"];
-const categoryOptions = ["IT", "HR", "Office"];
+// ---------- Constants ----------
+const STATUS_OPTIONS = ["Open", "In Progress", "Resolved", "Closed"];
+const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
+const CATEGORY_OPTIONS = ["IT", "HR", "Office"];
 
-const statusColors = {
+const STATUS_COLORS = {
   Open: "primary",
   "In Progress": "warning",
   Resolved: "success",
   Closed: "default",
 };
 
+// ---------- Component ----------
 const FilteringAndSearchingPage = () => {
   const [tickets, setTickets] = useState([]);
+  const [filteredTickets, setFilteredTickets] = useState([]);
   const [filters, setFilters] = useState({
     status: "",
     priority: "",
     category: "",
     search: "",
   });
-  const [filteredTickets, setFilteredTickets] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,33 +47,32 @@ const FilteringAndSearchingPage = () => {
 
   const fetchTickets = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/tickets/assigned", {
-        withCredentials: true,
-      });
-      setTickets(res.data);
-      setFilteredTickets(res.data);
+      const { data } = await API.get("/api/tickets/assigned");
+      setTickets(data);
+      setFilteredTickets(data);
     } catch (err) {
       console.error("Error fetching tickets:", err);
     }
   };
 
   const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
+    setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleResetFilters = () => {
-    setFilters({ status: "", priority: "", category: "", search: "" });
+    const reset = { status: "", priority: "", category: "", search: "" };
+    setFilters(reset);
     setFilteredTickets(tickets);
   };
 
   const applyFilters = () => {
-    const results = tickets.filter((ticket) => {
-      const matchStatus = filters.status ? ticket.status === filters.status : true;
-      const matchPriority = filters.priority ? ticket.priority === filters.priority : true;
-      const matchCategory = filters.category ? ticket.category === filters.category : true;
+    const results = tickets.filter(({ status, priority, category, title, description }) => {
+      const matchStatus = filters.status ? status === filters.status : true;
+      const matchPriority = filters.priority ? priority === filters.priority : true;
+      const matchCategory = filters.category ? category === filters.category : true;
       const matchSearch = filters.search
-        ? ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-          ticket.description.toLowerCase().includes(filters.search.toLowerCase())
+        ? title.toLowerCase().includes(filters.search.toLowerCase()) ||
+          description.toLowerCase().includes(filters.search.toLowerCase())
         : true;
       return matchStatus && matchPriority && matchCategory && matchSearch;
     });
@@ -83,6 +85,7 @@ const FilteringAndSearchingPage = () => {
         🔍 Filter & Search Tickets
       </Typography>
 
+      {/* Filters */}
       <Paper elevation={3} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={3}>
@@ -95,7 +98,7 @@ const FilteringAndSearchingPage = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="">All</MenuItem>
-              {statusOptions.map((status) => (
+              {STATUS_OPTIONS.map((status) => (
                 <MenuItem key={status} value={status}>
                   {status}
                 </MenuItem>
@@ -113,7 +116,7 @@ const FilteringAndSearchingPage = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="">All</MenuItem>
-              {priorityOptions.map((priority) => (
+              {PRIORITY_OPTIONS.map((priority) => (
                 <MenuItem key={priority} value={priority}>
                   {priority}
                 </MenuItem>
@@ -131,7 +134,7 @@ const FilteringAndSearchingPage = () => {
               onChange={handleFilterChange}
             >
               <MenuItem value="">All</MenuItem>
-              {categoryOptions.map((cat) => (
+              {CATEGORY_OPTIONS.map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}
                 </MenuItem>
@@ -160,6 +163,7 @@ const FilteringAndSearchingPage = () => {
         </Stack>
       </Paper>
 
+      {/* Tickets */}
       {filteredTickets.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
           ❌ No tickets match your current filter criteria.
@@ -176,7 +180,9 @@ const FilteringAndSearchingPage = () => {
                   transition: "0.2s",
                   ":hover": { boxShadow: 5, cursor: "pointer" },
                 }}
-                onClick={() => navigate(`/support-agent-dashboard/filter&search/${ticket._id}`)}
+                onClick={() =>
+                  navigate(`/support-agent-dashboard/filter&search/${ticket._id}`)
+                }
               >
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                   <Typography variant="h6" color="primary">
@@ -184,13 +190,17 @@ const FilteringAndSearchingPage = () => {
                   </Typography>
                   <Chip
                     label={ticket.status}
-                    color={statusColors[ticket.status] || "default"}
+                    color={STATUS_COLORS[ticket.status] || "default"}
                     size="small"
                   />
                 </Box>
 
-                <Typography variant="body2"><strong>Priority:</strong> {ticket.priority}</Typography>
-                <Typography variant="body2"><strong>Category:</strong> {ticket.category}</Typography>
+                <Typography variant="body2">
+                  <strong>Priority:</strong> {ticket.priority}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Category:</strong> {ticket.category}
+                </Typography>
                 <Typography variant="body2" sx={{ mb: 1 }}>
                   <strong>Created:</strong> {dayjs(ticket.createdAt).format("YYYY-MM-DD")}
                 </Typography>

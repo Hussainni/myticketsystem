@@ -3,6 +3,7 @@ import { AuthContext } from "./AuthContext";
 import { eraseCookie, getCookie, setCookie } from "@jumbo/utilities/cookies";
 import axios from "axios";
 import { toast } from "react-toastify";
+import API from "@app/pages/admin/api/api";
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
@@ -10,65 +11,40 @@ export function AuthProvider({ children }) {
   const [user, setUser] = React.useState(null);
   const [userLoading, setUserLoading] = React.useState(false);
   // useState for loggeg in users
-  const [loggedInUser,setLoggedInUser] = React.useState({})
-
-
-  // funciton for logged in User
-  //   const fetchLoggedInUser = async () => {
-  //   setUserLoading(true);
-  //   try {
-  //     const response = await axios.get("http://localhost:3000/api/users/me",{ withCredentials: true })
-  //     if(response){
-  //       setIsAuthenticated(true)
-  //     }
-  //     setLoggedInUser(response.data)
-  //     return response.data
-  //   } catch (error) {
-  //     console.log("error message:",error);
-  //     return false
-  //   }
-  // }
+  const [loggedInUser, setLoggedInUser] = React.useState({})
 
   const fetchLoggedInUser = async () => {
-  setUserLoading(true);
-  try {
-    const response = await axios.get("http://localhost:3000/api/users/me", { withCredentials: true });
-    if (response) {
-      setIsAuthenticated(true);
+    setUserLoading(true);
+    try {
+      const response = await API.get("/api/users/me"); // prepend /api here
+      if (response) {
+        setIsAuthenticated(true);
+      }
+      setLoggedInUser(response.data);
+      return response.data;
+    } catch (error) {
+      console.log("error message:", error);
+      return false;
+    } finally {
+      setUserLoading(false);
     }
-    setLoggedInUser(response.data);
-    return response.data;
-  } catch (error) {
-    console.log("error message:", error);
-    return false;
-  } finally {
-    setUserLoading(false);
-  }
-};
+  };
 
-
-  useEffect(()=>{
-  fetchLoggedInUser()
-  },[])
+  useEffect(() => {
+    fetchLoggedInUser()
+  }, [])
 
   // Fetch user data from API
   const fetchUser = async () => {
     setUserLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/users",
-        { withCredentials: true }
-      );
-
-      console.log("this is user fetching response: " , response.data);
-      
+      const response = await API.get("/api/users"); // <-- /api
       if (response.data) {
         setUser(response.data);
         return response.data;
       }
     } catch (error) {
       console.error("Failed to fetch user data:", error);
-      // If 401, user is not authenticated
       if (error.response?.status === 401) {
         setIsAuthenticated(false);
         setUser(null);
@@ -90,7 +66,7 @@ export function AuthProvider({ children }) {
   };
 
 
-    // Refresh user data (re-fetch from server)
+  // Refresh user data (re-fetch from server)
   const refreshLoggegInUser = async () => {
     return await fetchLoggedInUser();
   };
@@ -98,53 +74,19 @@ export function AuthProvider({ children }) {
   const login = async ({ email, password }) => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
+      const response = await API.post("/api/auth/login", { email, password }); // <-- /api
       if (response.data.token) {
-        const stringify = {
-          token: response.data.token,
-          email: response.data.email,
-        };
-        const authUserSr = encodeURIComponent(JSON.stringify(stringify));
-        // setCookie("token", authUserSr, 1);
         setCookie("token", response.data.token, 1);
         setIsAuthenticated(true);
-        
-        // Fetch user data after successful login
         await fetchUser();
-        await fetchLoggedInUser()
-        
-        // Show success toast
-        toast.success("Login successful! Welcome back!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        
+        await fetchLoggedInUser();
+        toast.success("Login successful! Welcome back!");
         return response.data;
       }
-      else {
-        return false;
-      }
+      return false;
     } catch (error) {
       setIsAuthenticated(false);
-      
-      // Show error toast
-      toast.error(error.response?.data?.message || "Login failed. Please try again.", {
-        position: "top-right",
-        autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      
+      toast.error(error.response?.data?.message || "Login failed. Please try again.");
       return false;
     } finally {
       setLoading(false);
@@ -153,37 +95,19 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/logout", {}, { withCredentials: true });
+      const response = await API.post("/api/auth/logout", {}); // <-- /api
       if (response.status === 200) {
         eraseCookie("token");
         setIsAuthenticated(false);
-        setUser(null); // Clear user data on logout
-        
-        // Show success toast
-        toast.info("Logged out successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        setUser(null);
+        toast.info("Logged out successfully!");
       }
     } catch (error) {
       console.log(error);
-      
-      // Show error toast
-      toast.error("Logout failed. Please try again.", {
-        position: "top-right",
-        autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.error("Logout failed. Please try again.");
     }
   };
-
+  
   React.useEffect(() => {
     const initializeAuth = async () => {
       let authUserSr = getCookie("token");
@@ -200,11 +124,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ 
-      isAuthenticated, 
-      loading, 
-      login, 
-      logout, 
+    <AuthContext.Provider value={{
+      isAuthenticated,
+      loading,
+      login,
+      logout,
       setIsAuthenticated,
       user,
       userLoading,

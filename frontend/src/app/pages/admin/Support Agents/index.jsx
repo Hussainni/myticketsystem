@@ -1,7 +1,5 @@
 // /pages/admin-dashboard/agents/index.jsx
-
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Card,
@@ -20,6 +18,7 @@ import {
   Alert,
 } from "@mui/material";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import API from "../api/api";
 
 const AgentsPage = () => {
   const [agents, setAgents] = useState([]);
@@ -34,10 +33,8 @@ const AgentsPage = () => {
 
   const fetchAgents = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/users/support-agents", {
-        withCredentials: true,
-      });
-      setAgents(res.data);
+      const { data } = await API.get("/api/users/support-agents");
+      setAgents(data);
     } catch (err) {
       console.error("Error fetching support agents:", err);
     } finally {
@@ -47,9 +44,7 @@ const AgentsPage = () => {
 
   const handleCreateAgent = async () => {
     try {
-      await axios.post("http://localhost:3000/api/auth/create", newAgent, {
-        withCredentials: true,
-      });
+      await API.post("/api/auth/create", newAgent);
       setSuccessMessage("Support agent created successfully");
       setNewAgent({ name: "", email: "", password: "" });
       fetchAgents();
@@ -60,11 +55,7 @@ const AgentsPage = () => {
 
   const handleRoleChange = async (id, newRole) => {
     try {
-      await axios.patch(
-        `http://localhost:3000/api/users/${id}/role`,
-        { role: newRole },
-        { withCredentials: true }
-      );
+      await API.patch(`/api/users/${id}/role`, { role: newRole });
       setSuccessMessage("Role updated successfully");
       fetchAgents();
     } catch (err) {
@@ -78,6 +69,7 @@ const AgentsPage = () => {
         Support Agents
       </Typography>
 
+      {/* Create Agent Form */}
       <Box mb={4}>
         <Typography variant="h6" gutterBottom>
           Create New Support Agent
@@ -88,7 +80,9 @@ const AgentsPage = () => {
               fullWidth
               label="Name"
               value={newAgent.name}
-              onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+              onChange={(e) =>
+                setNewAgent((prev) => ({ ...prev, name: e.target.value }))
+              }
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -96,7 +90,9 @@ const AgentsPage = () => {
               fullWidth
               label="Email"
               value={newAgent.email}
-              onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+              onChange={(e) =>
+                setNewAgent((prev) => ({ ...prev, email: e.target.value }))
+              }
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -105,7 +101,9 @@ const AgentsPage = () => {
               type="password"
               label="Password"
               value={newAgent.password}
-              onChange={(e) => setNewAgent({ ...newAgent, password: e.target.value })}
+              onChange={(e) =>
+                setNewAgent((prev) => ({ ...prev, password: e.target.value }))
+              }
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -122,12 +120,18 @@ const AgentsPage = () => {
         </Grid>
       </Box>
 
+      {/* Agents List */}
       {loading ? (
         <Box display="flex" justifyContent="center" mt={6}>
           <CircularProgress />
         </Box>
       ) : agents.length === 0 ? (
-        <Typography variant="h6" align="center" color="text.secondary" sx={{ mt: 4 }}>
+        <Typography
+          variant="h6"
+          align="center"
+          color="text.secondary"
+          sx={{ mt: 4 }}
+        >
           No support agents found.
         </Typography>
       ) : (
@@ -158,7 +162,10 @@ const AgentsPage = () => {
                           value={roleChange[agent._id] || agent.role}
                           label="Role"
                           onChange={(e) => {
-                            setRoleChange({ ...roleChange, [agent._id]: e.target.value });
+                            setRoleChange((prev) => ({
+                              ...prev,
+                              [agent._id]: e.target.value,
+                            }));
                             handleRoleChange(agent._id, e.target.value);
                           }}
                         >
@@ -176,6 +183,7 @@ const AgentsPage = () => {
         </Grid>
       )}
 
+      {/* Snackbar */}
       <Snackbar
         open={!!successMessage}
         autoHideDuration={4000}

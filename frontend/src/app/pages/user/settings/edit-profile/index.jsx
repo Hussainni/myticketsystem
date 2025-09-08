@@ -1,6 +1,6 @@
-import React from "react";
+// EditProfile.jsx
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
   JumboForm,
   JumboInput,
@@ -16,56 +16,52 @@ import { SettingHeader } from "@app/_components/user/settings";
 import { useAuth } from "@app/_components/_core/AuthProvider/hooks";
 import { toast } from "react-toastify";
 import * as yup from "yup";
+import API from "../../../admin/api/api"; // ✅ use your centralized API
 
+// ✅ Validation schema
 const validationSchema = yup.object({
   name: yup.string().required("Name is required"),
-  email: yup.string().email("Invalid email format").required("Email is required"),
+  email: yup
+    .string()
+    .email("Invalid email format")
+    .required("Email is required"),
 });
 
 const EditProfile = () => {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
-  const [success, setSuccess] = React.useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState({ error: "", success: "" });
 
   const handleProfileUpdate = async (data) => {
     setLoading(true);
-    setError("");
-    setSuccess("");
+    setFeedback({ error: "", success: "" });
 
     try {
-      const response = await axios.put(
-        "http://localhost:3000/api/users/profile",
-        {
-          name: data.name,
-          email: data.email,
-        },
-        { withCredentials: true }
-      );
+      const { data: response } = await API.put("/api/users/profile", {
+        name: data.name,
+        email: data.email,
+      });
 
-      // ✅ Assume response contains updated user object
-      const updatedUser = response.data.user;
+      const updatedUser = response?.user;
 
-      if (updatedUser) {
-        setSuccess("Profile updated successfully!");
-        updateUser(updatedUser);
+      if (!updatedUser) throw new Error("Invalid response from server.");
 
-        toast.success("Profile updated successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+      updateUser(updatedUser);
+      setFeedback({ success: "Profile updated successfully!", error: "" });
 
-        setTimeout(() => {
-          navigate("/"); // redirect if needed
-        }, 2000);
-      } else {
-        throw new Error("Invalid response from server.");
-      }
+      toast.success("Profile updated successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
 
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to update profile";
-      setError(errorMessage);
+      setTimeout(() => navigate("/"), 2000);
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message || "Failed to update profile";
+
+      setFeedback({ error: errorMessage, success: "" });
 
       toast.error(errorMessage, {
         position: "top-right",
@@ -78,22 +74,22 @@ const EditProfile = () => {
 
   return (
     <>
-      <SettingHeader title={"Edit Profile"} />
+      <SettingHeader title="Edit Profile" />
 
       <JumboCard
-        title={"Update Your Profile Information"}
+        title="Update Your Profile Information"
         contentWrapper
         sx={{ maxWidth: 600, mx: "auto", mt: 2 }}
       >
-        {error && (
+        {feedback.error && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+            {feedback.error}
           </Alert>
         )}
 
-        {success && (
+        {feedback.success && (
           <Alert severity="success" sx={{ mb: 2 }}>
-            {success}
+            {feedback.success}
           </Alert>
         )}
 
@@ -123,16 +119,18 @@ const EditProfile = () => {
               variant="contained"
               size="large"
               loading={loading}
-              disabled={loading}  
+              disabled={loading}
             >
               Update Profile
             </LoadingButton>
-
           </Stack>
         </JumboForm>
 
         {user && (
-          <Stack spacing={1} sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+          <Stack
+            spacing={1}
+            sx={{ mt: 3, p: 2, bgcolor: "grey.50", borderRadius: 1 }}
+          >
             <Typography variant="subtitle2" color="text.secondary">
               Current Information:
             </Typography>

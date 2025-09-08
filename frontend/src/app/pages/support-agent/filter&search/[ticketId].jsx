@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -10,18 +9,19 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Divider,
   Stack,
   Chip,
   MenuItem,
 } from "@mui/material";
 import dayjs from "dayjs";
+import API from "../../admin/api/api"; // adjust relative path if needed
 
 const statusOptions = ["Open", "In Progress", "Resolved", "Closed"];
 
 const FilterTicketDetailPage = () => {
   const { ticketId } = useParams();
   const navigate = useNavigate();
+
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -33,51 +33,43 @@ const FilterTicketDetailPage = () => {
     fetchComments();
   }, [ticketId]);
 
+  /** Fetch single ticket */
   const fetchTicket = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/tickets/${ticketId}`, {
-        withCredentials: true,
-      });
-      setTicket(res.data);
-      setStatus(res.data.status);
+      const { data } = await API.get(`/api/tickets/${ticketId}`);
+      setTicket(data);
+      setStatus(data.status);
     } catch (err) {
       console.error("Error fetching ticket:", err);
     }
   };
 
+  /** Fetch ticket comments */
   const fetchComments = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/comments/${ticketId}`, {
-        withCredentials: true,
-      });
-      setComments(res.data);
+      const { data } = await API.get(`/api/comments/${ticketId}`);
+      setComments(data);
     } catch (err) {
       console.error("Error fetching comments:", err);
     }
   };
 
+  /** Update ticket status */
   const handleStatusChange = async () => {
     try {
-      await axios.patch(
-        `http://localhost:3000/api/tickets/${ticketId}/status`,
-        { status },
-        { withCredentials: true }
-      );
+      await API.patch(`/api/tickets/${ticketId}/status`, { status });
       fetchTicket();
     } catch (err) {
       console.error("Error updating status:", err);
     }
   };
 
+  /** Submit new comment */
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) return;
     try {
       setLoading(true);
-      await axios.post(
-        `http://localhost:3000/api/comments/${ticketId}`,
-        { text: newComment },
-        { withCredentials: true }
-      );
+      await API.post(`/api/comments/${ticketId}`, { text: newComment });
       setNewComment("");
       fetchComments();
     } catch (err) {
@@ -105,21 +97,25 @@ const FilterTicketDetailPage = () => {
         🎜️ Ticket Details
       </Typography>
 
+      {/* Ticket Info */}
       <Paper sx={{ p: 4, borderRadius: 4, mb: 4 }} elevation={3}>
         <Typography variant="h5" gutterBottom>
           {ticket.title}
         </Typography>
 
         <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-          <Chip label={`Status: ${ticket.status}`} color={
-            ticket.status === "Open"
-              ? "primary"
-              : ticket.status === "In Progress"
-              ? "warning"
-              : ticket.status === "Resolved"
-              ? "success"
-              : "default"
-          } />
+          <Chip
+            label={`Status: ${ticket.status}`}
+            color={
+              ticket.status === "Open"
+                ? "primary"
+                : ticket.status === "In Progress"
+                ? "warning"
+                : ticket.status === "Resolved"
+                ? "success"
+                : "default"
+            }
+          />
           <Chip label={`Priority: ${ticket.priority}`} variant="outlined" />
           <Chip label={`Category: ${ticket.category}`} variant="outlined" />
         </Stack>
@@ -134,6 +130,7 @@ const FilterTicketDetailPage = () => {
           {ticket.description || "No description provided."}
         </Typography>
 
+        {/* Status Update */}
         <Box mt={3}>
           <TextField
             select
@@ -154,6 +151,7 @@ const FilterTicketDetailPage = () => {
         </Box>
       </Paper>
 
+      {/* Comments Section */}
       <Typography variant="h5" gutterBottom>
         💬 Comments
       </Typography>
@@ -163,7 +161,8 @@ const FilterTicketDetailPage = () => {
           {comments.map((comment) => (
             <Box key={comment._id} sx={{ p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
               <Typography variant="body2" fontWeight="bold">
-                {(comment.userId && comment.userId.name) || "Unknown User"} — {dayjs(comment.createdAt).format("YYYY-MM-DD HH:mm")}
+                {(comment.userId?.name) || "Unknown User"} —{" "}
+                {dayjs(comment.createdAt).format("YYYY-MM-DD HH:mm")}
               </Typography>
               <Typography variant="body1">{comment.text}</Typography>
               {comment.attachment && (
@@ -175,6 +174,7 @@ const FilterTicketDetailPage = () => {
           ))}
         </Stack>
 
+        {/* Comment Form */}
         <Box mt={4}>
           <TextField
             label="Add a comment"

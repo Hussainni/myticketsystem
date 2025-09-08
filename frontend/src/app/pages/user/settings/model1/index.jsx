@@ -1,4 +1,5 @@
-import React from "react";
+// EditProfileModal.jsx
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,10 +12,11 @@ import {
 import { JumboForm, JumboInput } from "@jumbo/vendors/react-hook-form";
 import { LoadingButton } from "@mui/lab";
 import * as yup from "yup";
-import axios from "axios";
 import { useAuth } from "@app/_components/_core/AuthProvider/hooks";
 import { toast } from "react-toastify";
+import API from "../../../admin/api/api"; // ✅ centralized axios instance
 
+// ✅ Validation schema
 const validationSchema = yup.object({
   name: yup.string().required("Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
@@ -22,9 +24,9 @@ const validationSchema = yup.object({
 
 const EditProfileModal = ({ open, onClose }) => {
   const { user, updateUser } = useAuth();
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
-  const [success, setSuccess] = React.useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (data) => {
     setError("");
@@ -32,15 +34,11 @@ const EditProfileModal = ({ open, onClose }) => {
     setLoading(true);
 
     try {
-      const res = await axios.put(
-        "http://localhost:3000/api/users/profile",
-        data,
-        { withCredentials: true }
-      );
+      const res = await API.put("/api/users/profile", data); // ✅ using API.js
       updateUser(res.data.user);
       setSuccess("Profile updated successfully");
       toast.success("Profile updated");
-      onClose(); // close modal
+      onClose();
     } catch (err) {
       const msg = err.response?.data?.message || "Failed to update profile";
       setError(msg);
@@ -53,13 +51,18 @@ const EditProfileModal = ({ open, onClose }) => {
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Edit Profile</DialogTitle>
       <DialogContent>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {success}
+          </Alert>
+        )}
 
-        <JumboForm
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
+        <JumboForm validationSchema={validationSchema} onSubmit={handleSubmit}>
           <Stack spacing={2} mt={1}>
             <JumboInput
               fieldName="name"
@@ -79,7 +82,9 @@ const EditProfileModal = ({ open, onClose }) => {
         </JumboForm>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">Cancel</Button>
+        <Button onClick={onClose} color="secondary">
+          Cancel
+        </Button>
       </DialogActions>
     </Dialog>
   );

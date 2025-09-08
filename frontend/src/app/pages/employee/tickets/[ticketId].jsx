@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+// TicketDetailPage.jsx
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -8,7 +8,6 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Divider,
   Stack,
   Chip,
   useMediaQuery,
@@ -16,10 +15,12 @@ import {
 } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import dayjs from "dayjs";
+import API from "../../admin/api/api"; // ✅ using your centralized api.js
 
 const TicketDetailPage = () => {
   const { ticketId } = useParams();
   const navigate = useNavigate();
+
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -28,45 +29,34 @@ const TicketDetailPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Fetch ticket and comments
-  useEffect(() => {
-    fetchTicket();
-    fetchComments();
-  }, [ticketId]);
-
-  const fetchTicket = async () => {
+  /** ✅ Fetch Ticket */
+  const fetchTicket = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/tickets/${ticketId}`, {
-        withCredentials: true,
-      });
-      setTicket(res.data);
+      const { data } = await API.get(`/api/tickets/${ticketId}`);
+      setTicket(data);
     } catch (err) {
       console.error("Error fetching ticket:", err);
     }
-  };
+  }, [ticketId]);
 
-  const fetchComments = async () => {
+  /** ✅ Fetch Comments */
+  const fetchComments = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/comments/${ticketId}`, {
-        withCredentials: true,
-      });
-      setComments(res.data);
+      const { data } = await API.get(`/api/comments/${ticketId}`);
+      setComments(data);
     } catch (err) {
       console.error("Error fetching comments:", err);
     }
-  };
+  }, [ticketId]);
 
+  /** ✅ Post Comment */
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) return;
     try {
       setLoading(true);
-      await axios.post(
-        `http://localhost:3000/api/comments/${ticketId}`,
-        { text: newComment },
-        { withCredentials: true }
-      );
+      await API.post(`/api/comments/${ticketId}`, { text: newComment });
       setNewComment("");
-      fetchComments();
+      fetchComments(); // refresh comments
     } catch (err) {
       console.error("Error adding comment:", err);
     } finally {
@@ -74,6 +64,13 @@ const TicketDetailPage = () => {
     }
   };
 
+  /** ✅ Initial Data Fetch */
+  useEffect(() => {
+    fetchTicket();
+    fetchComments();
+  }, [fetchTicket, fetchComments]);
+
+  /** ✅ Loading State */
   if (!ticket) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
@@ -161,7 +158,7 @@ const TicketDetailPage = () => {
               }}
             >
               <Typography variant="body2" fontWeight={600}>
-                {(comment.userId && comment.userId.name) || "Unknown User"} —{" "}
+                {(comment.userId?.name) || "Unknown User"} —{" "}
                 {dayjs(comment.createdAt).format("YYYY-MM-DD HH:mm")}
               </Typography>
               <Typography variant="body1">{comment.text}</Typography>

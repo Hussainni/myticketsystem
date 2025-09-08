@@ -1,5 +1,6 @@
+// CreateTicketPage.jsx
 import React, { useState } from "react";
-import axios from "axios";
+import API from "../../admin/api/api"; // adjust path as needed
 import {
   Box,
   Typography,
@@ -14,16 +15,18 @@ import {
   useTheme,
 } from "@mui/material";
 
-const categories = ["IT", "HR", "Office"];
-const priorities = ["Low", "Medium", "High"];
+const CATEGORIES = ["IT", "HR", "Office"];
+const PRIORITIES = ["Low", "Medium", "High"];
+
+const initialFormState = {
+  title: "",
+  description: "",
+  category: "",
+  priority: "",
+};
 
 const CreateTicketPage = () => {
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    category: "",
-    priority: "",
-  });
+  const [form, setForm] = useState(initialFormState);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -32,7 +35,8 @@ const CreateTicketPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -42,11 +46,9 @@ const CreateTicketPage = () => {
     setErrorMessage("");
 
     try {
-      await axios.post("http://localhost:3000/api/tickets", form, {
-        withCredentials: true,
-      });
+      await API.post("/api/tickets", form);
       setSuccessMessage("🎉 Ticket created successfully!");
-      setForm({ title: "", description: "", category: "", priority: "" });
+      setForm(initialFormState);
     } catch (err) {
       setErrorMessage("Something went wrong. Please try again.");
     } finally {
@@ -82,7 +84,6 @@ const CreateTicketPage = () => {
               label="Ticket Title"
               fullWidth
               required
-              variant="outlined"
               value={form.title}
               onChange={handleChange}
             />
@@ -94,7 +95,6 @@ const CreateTicketPage = () => {
               required
               multiline
               rows={4}
-              variant="outlined"
               value={form.description}
               onChange={handleChange}
             />
@@ -105,11 +105,10 @@ const CreateTicketPage = () => {
               select
               required
               fullWidth
-              variant="outlined"
               value={form.category}
               onChange={handleChange}
             >
-              {categories.map((cat) => (
+              {CATEGORIES.map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}
                 </MenuItem>
@@ -122,11 +121,10 @@ const CreateTicketPage = () => {
               select
               required
               fullWidth
-              variant="outlined"
               value={form.priority}
               onChange={handleChange}
             >
-              {priorities.map((priority) => (
+              {PRIORITIES.map((priority) => (
                 <MenuItem key={priority} value={priority}>
                   {priority}
                 </MenuItem>
@@ -155,4 +153,3 @@ const CreateTicketPage = () => {
 };
 
 export default CreateTicketPage;
-

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Card,
@@ -16,6 +15,7 @@ import {
   Chip,
   Tooltip,
 } from "@mui/material";
+import API from "../api/api";
 
 const statusColors = {
   Open: "warning",
@@ -28,47 +28,45 @@ const AssignTicketsPage = () => {
   const [tickets, setTickets] = useState([]);
   const [agents, setAgents] = useState([]);
   const [assigned, setAssigned] = useState({});
+  const [prioritySelection, setPrioritySelection] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    fetchUnassignedTickets();
-    fetchSupportAgents();
+    loadTickets();
+    loadAgents();
   }, []);
 
-  const fetchUnassignedTickets = async () => {
+  const loadTickets = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/tickets", {
-        withCredentials: true,
-      });
-      const unassigned = res.data.filter((ticket) => !ticket.assignedTo);
+      const { data } = await API.get("/api/tickets");
+      const unassigned = data.filter((ticket) => !ticket.assignedTo);
       setTickets(unassigned);
     } catch (err) {
       console.error("Error fetching tickets:", err);
     }
   };
 
-  const fetchSupportAgents = async () => {
+  const loadAgents = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/users/support-agents", {
-        withCredentials: true,
-      });
-      setAgents(res.data);
+      const { data } = await API.get("/api/users/support-agents");
+      setAgents(data);
     } catch (err) {
       console.error("Error fetching agents:", err);
     }
   };
 
   const handleAssign = async (ticketId) => {
+    const agentId = assigned[ticketId];
+    const selectedPriority = prioritySelection[ticketId];
+    if (!agentId || !selectedPriority) return;
+
     try {
-      const agentId = assigned[ticketId];
-      if (!agentId) return;
-      await axios.patch(
-        `http://localhost:3000/api/tickets/${ticketId}/assign`,
-        { assignedTo: agentId },
-        { withCredentials: true }
-      );
+      await API.patch(`/api/tickets/${ticketId}/assign`, {
+        assignedTo: agentId,
+        priority: selectedPriority,
+      });
       setSuccessMessage("Ticket assigned successfully");
-      setTickets(tickets.filter((t) => t._id !== ticketId));
+      setTickets((prev) => prev.filter((t) => t._id !== ticketId));
     } catch (err) {
       console.error("Assignment error:", err);
     }
@@ -76,12 +74,10 @@ const AssignTicketsPage = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: "100%", overflowX: "hidden" }}>
-      {/* Page Header */}
       <Typography variant="h4" gutterBottom>
         Assign Tickets
       </Typography>
 
-      {/* No Unassigned Tickets */}
       {tickets.length === 0 ? (
         <Typography
           variant="h6"
@@ -92,7 +88,6 @@ const AssignTicketsPage = () => {
           All tickets are assigned 🎉
         </Typography>
       ) : (
-        // Ticket Cards Grid
         <Grid container spacing={3}>
           {tickets.map((ticket) => (
             <Grid item xs={12} md={6} lg={4} key={ticket._id}>
@@ -108,7 +103,7 @@ const AssignTicketsPage = () => {
                 }}
               >
                 <CardContent sx={{ flexGrow: 1 }}>
-                  {/* Ticket Title & Status */}
+                  {/* Ticket Header */}
                   <Box
                     display="flex"
                     justifyContent="space-between"
@@ -139,8 +134,27 @@ const AssignTicketsPage = () => {
                     <strong>Category:</strong> {ticket.category}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Priority:</strong> {ticket.priority}
+                    <strong>Priority:</strong> {ticket.priority || "Not set"}
                   </Typography>
+
+                  {/* Priority Dropdown */}
+                  <FormControl fullWidth sx={{ mt: 2 }}>
+                    <InputLabel>Set Priority</InputLabel>
+                    <Select
+                      value={prioritySelection[ticket._id] || ""}
+                      label="Set Priority"
+                      onChange={(e) =>
+                        setPrioritySelection((prev) => ({
+                          ...prev,
+                          [ticket._id]: e.target.value,
+                        }))
+                      }
+                    >
+                      <MenuItem value="Low">Low</MenuItem>
+                      <MenuItem value="Medium">Medium</MenuItem>
+                      <MenuItem value="High">High</MenuItem>
+                    </Select>
+                  </FormControl>
 
                   {/* Assign Dropdown */}
                   <FormControl fullWidth sx={{ mt: 2 }}>
@@ -149,7 +163,10 @@ const AssignTicketsPage = () => {
                       value={assigned[ticket._id] || ""}
                       label="Assign to"
                       onChange={(e) =>
-                        setAssigned({ ...assigned, [ticket._id]: e.target.value })
+                        setAssigned((prev) => ({
+                          ...prev,
+                          [ticket._id]: e.target.value,
+                        }))
                       }
                     >
                       {agents.map((agent) => (

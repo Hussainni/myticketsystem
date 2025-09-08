@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -14,6 +13,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import API from "../../admin/api/api"; // ✅ use central API instance
 
 // ========================
 // Constants
@@ -28,6 +28,14 @@ const STATUS_COLORS = {
 const STATUS_OPTIONS = ["Open", "In Progress", "Resolved", "Closed"];
 const CATEGORY_OPTIONS = ["IT", "HR", "Office"];
 
+const initialFilters = {
+  status: "",
+  category: "",
+  search: "",
+  startDate: "",
+  endDate: "",
+};
+
 // ========================
 // Component
 // ========================
@@ -35,14 +43,7 @@ const MyTicketsPage = () => {
   const [tickets, setTickets] = useState([]);
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [filters, setFilters] = useState({
-    status: "",
-    category: "",
-    search: "",
-    startDate: "",
-    endDate: "",
-  });
+  const [filters, setFilters] = useState(initialFilters);
 
   const navigate = useNavigate();
 
@@ -52,11 +53,9 @@ const MyTicketsPage = () => {
   useEffect(() => {
     const fetchMyTickets = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/tickets/my", {
-          withCredentials: true,
-        });
-        setTickets(res.data);
-        setFilteredTickets(res.data);
+        const { data } = await API.get("/api/tickets/my");
+        setTickets(data);
+        setFilteredTickets(data);
       } catch (err) {
         console.error("Error fetching tickets:", err);
       } finally {
@@ -68,12 +67,8 @@ const MyTicketsPage = () => {
   }, []);
 
   // ========================
-  // Filter Handlers
+  // Filtering Logic
   // ========================
-  const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
-  };
-
   const applyFilters = () => {
     const result = tickets.filter((ticket) => {
       const matchStatus = filters.status ? ticket.status === filters.status : true;
@@ -96,8 +91,15 @@ const MyTicketsPage = () => {
   };
 
   const resetFilters = () => {
-    setFilters({ status: "", category: "", search: "", startDate: "", endDate: "" });
+    setFilters(initialFilters);
     setFilteredTickets(tickets);
+  };
+
+  // ========================
+  // Handlers
+  // ========================
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   // ========================
@@ -115,6 +117,7 @@ const MyTicketsPage = () => {
       {/* =================== */}
       <Paper sx={{ p: 3, borderRadius: 3, mb: 4 }}>
         <Grid container spacing={2}>
+          {/* Status */}
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               label="Status"
@@ -133,6 +136,7 @@ const MyTicketsPage = () => {
             </TextField>
           </Grid>
 
+          {/* Category */}
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               label="Category"
@@ -151,6 +155,7 @@ const MyTicketsPage = () => {
             </TextField>
           </Grid>
 
+          {/* Start Date */}
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               label="Start Date"
@@ -163,6 +168,7 @@ const MyTicketsPage = () => {
             />
           </Grid>
 
+          {/* End Date */}
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               label="End Date"
@@ -175,6 +181,7 @@ const MyTicketsPage = () => {
             />
           </Grid>
 
+          {/* Search */}
           <Grid item xs={12} sm={6} md={6}>
             <TextField
               label="Search by Title or ID"
@@ -185,6 +192,7 @@ const MyTicketsPage = () => {
             />
           </Grid>
 
+          {/* Buttons */}
           <Grid item xs={12} sm={6} md={6} display="flex" alignItems="center" gap={2}>
             <Button variant="contained" color="primary" onClick={applyFilters}>
               Apply Filters
@@ -266,4 +274,3 @@ const MyTicketsPage = () => {
 };
 
 export default MyTicketsPage;
-

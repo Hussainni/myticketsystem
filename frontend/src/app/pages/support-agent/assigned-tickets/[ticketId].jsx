@@ -1,8 +1,6 @@
 // /pages/support-agent/tickets/[ticketId].jsx
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -10,14 +8,14 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Divider,
   Stack,
   MenuItem,
   Chip,
   IconButton,
 } from "@mui/material";
-import dayjs from "dayjs";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import dayjs from "dayjs";
+import API from "../../admin/api/api"; // using centralized API instance
 
 const statusOptions = ["Open", "In Progress", "Resolved", "Closed"];
 
@@ -31,42 +29,37 @@ const TicketDetailSupportAgent = () => {
   const [loading, setLoading] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  useEffect(() => {
-    fetchTicket();
-    fetchComments();
-  }, [ticketId]);
-
-  const fetchTicket = async () => {
+  /** Fetch Ticket */
+  const fetchTicket = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/tickets/${ticketId}`, {
-        withCredentials: true,
-      });
-      setTicket(res.data);
+      const { data } = await API.get(`/api/tickets/${ticketId}`);
+      setTicket(data);
     } catch (err) {
       console.error("Error fetching ticket:", err);
     }
-  };
+  }, [ticketId]);
 
-  const fetchComments = async () => {
+  /** Fetch Comments */
+  const fetchComments = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/comments/${ticketId}`, {
-        withCredentials: true,
-      });
-      setComments(res.data);
+      const { data } = await API.get(`/api/comments/${ticketId}`);
+      setComments(data);
     } catch (err) {
       console.error("Error fetching comments:", err);
     }
-  };
+  }, [ticketId]);
 
+  useEffect(() => {
+    fetchTicket();
+    fetchComments();
+  }, [fetchTicket, fetchComments]);
+
+  /** Add Comment */
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) return;
     try {
       setLoading(true);
-      await axios.post(
-        `http://localhost:3000/api/comments/${ticketId}`,
-        { text: newComment },
-        { withCredentials: true }
-      );
+      await API.post(`/api/comments/${ticketId}`, { text: newComment });
       setNewComment("");
       fetchComments();
     } catch (err) {
@@ -76,15 +69,12 @@ const TicketDetailSupportAgent = () => {
     }
   };
 
+  /** Update Status */
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
     try {
       setUpdatingStatus(true);
-      await axios.patch(
-        `http://localhost:3000/api/tickets/${ticketId}/status`,
-        { status: newStatus },
-        { withCredentials: true }
-      );
+      await API.patch(`/api/tickets/${ticketId}/status`, { status: newStatus });
       setTicket((prev) => ({ ...prev, status: newStatus }));
     } catch (err) {
       console.error("Error updating status:", err);
@@ -103,6 +93,7 @@ const TicketDetailSupportAgent = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
+      {/* Header */}
       <Box display="flex" alignItems="center" mb={2}>
         <IconButton onClick={() => navigate(-1)}>
           <ArrowBackIcon />
@@ -112,6 +103,7 @@ const TicketDetailSupportAgent = () => {
         </Typography>
       </Box>
 
+      {/* Ticket Info */}
       <Paper sx={{ p: 4, borderRadius: 4, mb: 4 }} elevation={3}>
         <Typography variant="h5" gutterBottom fontWeight={600}>
           {ticket.title}
@@ -120,12 +112,18 @@ const TicketDetailSupportAgent = () => {
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} flexWrap="wrap" mb={2}>
           <Chip label={`Priority: ${ticket.priority}`} variant="outlined" />
           <Chip label={`Category: ${ticket.category}`} variant="outlined" />
-          <Chip label={`Status: ${ticket.status}`} color={
-            ticket.status === "Open" ? "primary" :
-            ticket.status === "In Progress" ? "warning" :
-            ticket.status === "Resolved" ? "success" :
-            "default"
-          } />
+          <Chip
+            label={`Status: ${ticket.status}`}
+            color={
+              ticket.status === "Open"
+                ? "primary"
+                : ticket.status === "In Progress"
+                ? "warning"
+                : ticket.status === "Resolved"
+                ? "success"
+                : "default"
+            }
+          />
         </Stack>
 
         <Typography variant="body1" mb={1}>
@@ -157,32 +155,39 @@ const TicketDetailSupportAgent = () => {
         </Box>
       </Paper>
 
+      {/* Comments Section */}
       <Typography variant="h5" gutterBottom color="primary.main">
         💬 Comments
       </Typography>
 
       <Paper sx={{ p: 3, borderRadius: 3, mb: 4 }}>
         <Stack spacing={2}>
-          {comments.length === 0 && (
+          {comments.length === 0 ? (
             <Typography color="text.secondary">No comments yet.</Typography>
-          )}
-          {comments.map((comment) => (
-            <Box key={comment._id} sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 2 }}>
-              <Typography variant="body2" fontWeight="bold">
-                {comment.userId?.name || "Unknown"} — {dayjs(comment.createdAt).format("YYYY-MM-DD HH:mm")}
-              </Typography>
-              <Typography variant="body1" mt={0.5}>
-                {comment.text}
-              </Typography>
-              {comment.attachment && (
-                <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  📎 Attachment: {comment.attachment}
+          ) : (
+            comments.map((comment) => (
+              <Box
+                key={comment._id}
+                sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 2 }}
+              >
+                <Typography variant="body2" fontWeight="bold">
+                  {comment.userId?.name || "Unknown"} —{" "}
+                  {dayjs(comment.createdAt).format("YYYY-MM-DD HH:mm")}
                 </Typography>
-              )}
-            </Box>
-          ))}
+                <Typography variant="body1" mt={0.5}>
+                  {comment.text}
+                </Typography>
+                {comment.attachment && (
+                  <Typography variant="body2" color="text.secondary" mt={0.5}>
+                    📎 Attachment: {comment.attachment}
+                  </Typography>
+                )}
+              </Box>
+            ))
+          )}
         </Stack>
 
+        {/* Add Comment */}
         <Box mt={4}>
           <TextField
             label="Add a comment"

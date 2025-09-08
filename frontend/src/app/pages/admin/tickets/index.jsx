@@ -1,3 +1,4 @@
+// /pages/admin-dashboard/tickets/search-filter.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -13,9 +14,9 @@ import {
   Chip,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import axios from "axios";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import API from "../api/api";
 
 const statusColors = {
   Open: "primary",
@@ -45,11 +46,9 @@ const SearchAndFilterPage = () => {
 
   const fetchTickets = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/tickets", {
-        withCredentials: true,
-      });
-      setTickets(res.data);
-      setFilteredTickets(res.data);
+      const { data } = await API.get("/api/tickets");
+      setTickets(data);
+      setFilteredTickets(data);
     } catch (err) {
       console.error("Failed to fetch tickets", err);
     }
@@ -57,10 +56,8 @@ const SearchAndFilterPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/users", {
-        withCredentials: true,
-      });
-      setUsers(res.data);
+      const { data } = await API.get("/api/users");
+      setUsers(data);
     } catch (err) {
       console.error("Failed to fetch users", err);
     }
@@ -70,10 +67,11 @@ const SearchAndFilterPage = () => {
     let temp = [...tickets];
 
     if (search.trim()) {
+      const term = search.toLowerCase();
       temp = temp.filter(
         (ticket) =>
-          ticket.title.toLowerCase().includes(search.toLowerCase()) ||
-          ticket._id.toLowerCase().includes(search.toLowerCase())
+          ticket.title.toLowerCase().includes(term) ||
+          ticket._id.toLowerCase().includes(term)
       );
     }
 
@@ -130,7 +128,11 @@ const SearchAndFilterPage = () => {
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
-              <Select value={status} onChange={(e) => setStatus(e.target.value)} label="Status">
+              <Select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                label="Status"
+              >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="Open">Open</MenuItem>
                 <MenuItem value="In Progress">In Progress</MenuItem>
@@ -144,7 +146,11 @@ const SearchAndFilterPage = () => {
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
-              <Select value={category} onChange={(e) => setCategory(e.target.value)} label="Category">
+              <Select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                label="Category"
+              >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="IT">IT</MenuItem>
                 <MenuItem value="HR">HR</MenuItem>
@@ -157,7 +163,11 @@ const SearchAndFilterPage = () => {
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
               <InputLabel>Priority</InputLabel>
-              <Select value={priority} onChange={(e) => setPriority(e.target.value)} label="Priority">
+              <Select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                label="Priority"
+              >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="Low">Low</MenuItem>
                 <MenuItem value="Medium">Medium</MenuItem>
@@ -213,7 +223,11 @@ const SearchAndFilterPage = () => {
               <Button variant="contained" onClick={handleFilter}>
                 Apply Filters
               </Button>
-              <Button variant="outlined" startIcon={<RefreshIcon />} onClick={resetFilters}>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={resetFilters}
+              >
                 Reset Filters
               </Button>
             </Box>
@@ -242,9 +256,16 @@ const SearchAndFilterPage = () => {
                     backgroundColor: "#f9f9f9",
                   },
                 }}
-                onClick={() => navigate(`/admin-dashboard/tickets/${ticket._id}`)}
+                onClick={() =>
+                  navigate(`/admin-dashboard/tickets/${ticket._id}`)
+                }
               >
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={1}
+                >
                   <Typography variant="h6" color="primary" noWrap>
                     {ticket.title}
                   </Typography>
@@ -264,10 +285,12 @@ const SearchAndFilterPage = () => {
                   <strong>Priority:</strong> {ticket.priority}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Assigned To:</strong> {ticket.assignedTo?.name || "Unassigned"}
+                  <strong>Assigned To:</strong>{" "}
+                  {ticket.assignedTo?.name || "Unassigned"}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Created:</strong> {dayjs(ticket.createdAt).format("YYYY-MM-DD")}
+                  <strong>Created:</strong>{" "}
+                  {dayjs(ticket.createdAt).format("YYYY-MM-DD")}
                 </Typography>
               </Paper>
             </Grid>

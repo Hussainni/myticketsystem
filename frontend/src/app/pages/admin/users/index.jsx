@@ -1,5 +1,5 @@
+// /pages/admin-dashboard/users/index.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -19,10 +19,16 @@ import {
   Stack,
 } from "@mui/material";
 import GroupIcon from "@mui/icons-material/Group";
+import API from "../api/api";
 
 const UserPage = () => {
   const [users, setUsers] = useState([]);
-  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "employee" });
+  const [newUser, setNewUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "employee",
+  });
   const [successMessage, setSuccessMessage] = useState("");
   const [roleChange, setRoleChange] = useState({});
 
@@ -32,10 +38,8 @@ const UserPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/users", {
-        withCredentials: true,
-      });
-      setUsers(res.data);
+      const { data } = await API.get("/api/users");
+      setUsers(data);
     } catch (err) {
       console.error("Error fetching users:", err);
     }
@@ -43,9 +47,7 @@ const UserPage = () => {
 
   const handleCreateUser = async () => {
     try {
-      await axios.post("http://localhost:3000/api/auth/create", newUser, {
-        withCredentials: true,
-      });
+      await API.post("/api/auth/create", newUser);
       setSuccessMessage("User created successfully");
       setNewUser({ name: "", email: "", password: "", role: "employee" });
       fetchUsers();
@@ -56,11 +58,7 @@ const UserPage = () => {
 
   const handleRoleUpdate = async (userId, newRole) => {
     try {
-      await axios.patch(
-        `http://localhost:3000/api/users/${userId}/role`,
-        { role: newRole },
-        { withCredentials: true }
-      );
+      await API.patch(`/api/users/${userId}/role`, { role: newRole });
       setSuccessMessage("User role updated successfully");
       fetchUsers();
     } catch (err) {
@@ -86,7 +84,9 @@ const UserPage = () => {
               label="Name"
               fullWidth
               value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+              onChange={(e) =>
+                setNewUser((prev) => ({ ...prev, name: e.target.value }))
+              }
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -94,7 +94,9 @@ const UserPage = () => {
               label="Email"
               fullWidth
               value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+              onChange={(e) =>
+                setNewUser((prev) => ({ ...prev, email: e.target.value }))
+              }
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
@@ -103,7 +105,9 @@ const UserPage = () => {
               type="password"
               fullWidth
               value={newUser.password}
-              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+              onChange={(e) =>
+                setNewUser((prev) => ({ ...prev, password: e.target.value }))
+              }
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
@@ -112,7 +116,9 @@ const UserPage = () => {
               <Select
                 value={newUser.role}
                 label="Role"
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                onChange={(e) =>
+                  setNewUser((prev) => ({ ...prev, role: e.target.value }))
+                }
               >
                 <MenuItem value="employee">Employee</MenuItem>
                 <MenuItem value="support">Support</MenuItem>
@@ -137,7 +143,14 @@ const UserPage = () => {
       <Grid container spacing={3}>
         {users.map((user) => (
           <Grid item xs={12} sm={6} md={4} key={user._id}>
-            <Card sx={{ borderRadius: 3, p: 2, boxShadow: 3, bgcolor: "#f9f9f9" }}>
+            <Card
+              sx={{
+                borderRadius: 3,
+                p: 2,
+                boxShadow: 3,
+                bgcolor: "#f9f9f9",
+              }}
+            >
               <CardContent>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Avatar sx={{ bgcolor: "primary.main" }}>
@@ -157,7 +170,10 @@ const UserPage = () => {
                         label="Role"
                         onChange={(e) => {
                           const newRole = e.target.value;
-                          setRoleChange({ ...roleChange, [user._id]: newRole });
+                          setRoleChange((prev) => ({
+                            ...prev,
+                            [user._id]: newRole,
+                          }));
                           handleRoleUpdate(user._id, newRole);
                         }}
                       >

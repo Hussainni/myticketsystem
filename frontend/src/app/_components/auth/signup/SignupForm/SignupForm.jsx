@@ -19,21 +19,6 @@ const SignupForm = () => {
     showPassword: false,
   });
 
-  // const handleSignup = async (data) => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await axios.post("http://localhost:3000/api/auth/register", { email: data.email, name: data.name, password: data.password });
-  //     console.log(response)
-  //     if (response.status === 200) {
-  //       navigate("/auth/login");
-  //     }
-  //   } catch (error) {
-  //     console.log("Signup error:", error.response?.data?.message || error.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
-
   const handleClickShowPassword = () => {
     setValues({
       ...values,

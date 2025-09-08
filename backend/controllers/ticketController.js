@@ -96,13 +96,14 @@ export const updateTicketStatus = async (req, res) => {
 
  
 export const assignTicket = async (req, res) => {
-  const { assignedTo } = req.body;
+  const { assignedTo, priority } = req.body;
 
   try {
     const ticket = await Ticket.findById(req.params.id);
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 
     ticket.assignedTo = assignedTo;
+    ticket.priority = priority
     await ticket.save();
 
     res.status(200).json({ message: "Ticket assigned", ticket });

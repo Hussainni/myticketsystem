@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -14,7 +13,9 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import API from "../../admin/api/api"; // ✅ use centralized API instance
 
+// ------------------ Constants ------------------
 const statusColors = {
   Open: "primary",
   "In Progress": "warning",
@@ -26,62 +27,65 @@ const statusOptions = ["Open", "In Progress", "Resolved", "Closed"];
 const priorityOptions = ["Low", "Medium", "High"];
 const categoryOptions = ["IT", "HR", "Office"];
 
+const initialFilters = {
+  status: "",
+  priority: "",
+  category: "",
+  fromDate: "",
+  toDate: "",
+};
+
+// ------------------ Component ------------------
 const AssignedTicketsPage = () => {
   const [tickets, setTickets] = useState([]);
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    status: "",
-    priority: "",
-    category: "",
-    fromDate: "",
-    toDate: "",
-  });
+  const [filters, setFilters] = useState(initialFilters);
 
   const navigate = useNavigate();
 
+  // Fetch assigned tickets
   useEffect(() => {
+    const fetchAssignedTickets = async () => {
+      try {
+        const { data } = await API.get("/api/tickets/assigned");
+        setTickets(data);
+        setFilteredTickets(data);
+      } catch (err) {
+        console.error("Error fetching assigned tickets:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchAssignedTickets();
   }, []);
 
-  const fetchAssignedTickets = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/tickets/assigned", {
-        withCredentials: true,
-      });
-      setTickets(res.data);
-      setFilteredTickets(res.data);
-    } catch (err) {
-      console.error("Error fetching assigned tickets:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Handle filter change
   const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
+    setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // Reset filters
   const handleResetFilters = () => {
-    setFilters({
-      status: "",
-      priority: "",
-      category: "",
-      fromDate: "",
-      toDate: "",
-    });
+    setFilters(initialFilters);
     setFilteredTickets(tickets);
   };
 
+  // Apply filters
   const applyFilters = () => {
     const results = tickets.filter((ticket) => {
+      const createdDate = dayjs(ticket.createdAt);
+
       const matchStatus = filters.status ? ticket.status === filters.status : true;
       const matchPriority = filters.priority ? ticket.priority === filters.priority : true;
       const matchCategory = filters.category ? ticket.category === filters.category : true;
-
-      const createdDate = dayjs(ticket.createdAt);
-      const matchFromDate = filters.fromDate ? createdDate.isAfter(dayjs(filters.fromDate).subtract(1, 'day')) : true;
-      const matchToDate = filters.toDate ? createdDate.isBefore(dayjs(filters.toDate).add(1, 'day')) : true;
+      const matchFromDate = filters.fromDate
+        ? createdDate.isAfter(dayjs(filters.fromDate).subtract(1, "day"))
+        : true;
+      const matchToDate = filters.toDate
+        ? createdDate.isBefore(dayjs(filters.toDate).add(1, "day"))
+        : true;
 
       return matchStatus && matchPriority && matchCategory && matchFromDate && matchToDate;
     });
@@ -95,9 +99,10 @@ const AssignedTicketsPage = () => {
         🧾 Assigned Tickets
       </Typography>
 
-      {/* Filters */}
+      {/* ------------------ Filters ------------------ */}
       <Paper elevation={3} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
         <Grid container spacing={2}>
+          {/* Status */}
           <Grid item xs={12} md={3}>
             <TextField
               select
@@ -116,6 +121,7 @@ const AssignedTicketsPage = () => {
             </TextField>
           </Grid>
 
+          {/* Priority */}
           <Grid item xs={12} md={3}>
             <TextField
               select
@@ -134,6 +140,7 @@ const AssignedTicketsPage = () => {
             </TextField>
           </Grid>
 
+          {/* Category */}
           <Grid item xs={12} md={3}>
             <TextField
               select
@@ -152,6 +159,7 @@ const AssignedTicketsPage = () => {
             </TextField>
           </Grid>
 
+          {/* From Date */}
           <Grid item xs={12} md={3}>
             <TextField
               type="date"
@@ -164,6 +172,7 @@ const AssignedTicketsPage = () => {
             />
           </Grid>
 
+          {/* To Date */}
           <Grid item xs={12} md={3}>
             <TextField
               type="date"
@@ -177,6 +186,7 @@ const AssignedTicketsPage = () => {
           </Grid>
         </Grid>
 
+        {/* Action Buttons */}
         <Stack direction="row" spacing={2} mt={3}>
           <Button variant="contained" color="primary" onClick={applyFilters}>
             Apply Filters
@@ -187,7 +197,7 @@ const AssignedTicketsPage = () => {
         </Stack>
       </Paper>
 
-      {/* Ticket Cards */}
+      {/* ------------------ Tickets ------------------ */}
       {loading ? (
         <Box display="flex" justifyContent="center" mt={5}>
           <CircularProgress />

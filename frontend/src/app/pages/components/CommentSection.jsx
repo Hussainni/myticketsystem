@@ -1,7 +1,6 @@
 // /src/app/components/CommentSection.jsx
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -12,6 +11,7 @@ import {
   Avatar,
   CircularProgress,
 } from "@mui/material";
+import API from "../admin/api/api";
 
 const CommentSection = ({ ticketId }) => {
   const [comments, setComments] = useState([]);
@@ -20,16 +20,13 @@ const CommentSection = ({ ticketId }) => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchComments();
+    loadComments();
   }, [ticketId]);
 
-  const fetchComments = async () => {
+  const loadComments = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:3000/api/comments/${ticketId}`,
-        { withCredentials: true }
-      );
-      setComments(res.data);
+      const { data } = await API.get(`/api/comments/${ticketId}`);
+      setComments(data);
     } catch (err) {
       console.error("Failed to load comments", err);
     } finally {
@@ -41,13 +38,9 @@ const CommentSection = ({ ticketId }) => {
     if (!text.trim()) return;
     setSubmitting(true);
     try {
-      await axios.post(
-        `http://localhost:3000/api/comments/${ticketId}`,
-        { text },
-        { withCredentials: true }
-      );
+      await API.post(`/api/comments/${ticketId}`, { text });
       setText("");
-      fetchComments();
+      loadComments(); // refresh list
     } catch (err) {
       console.error("Failed to submit comment", err);
     } finally {
@@ -96,7 +89,11 @@ const CommentSection = ({ ticketId }) => {
         sx={{ mb: 2 }}
       />
 
-      <Button variant="contained" onClick={handleSubmit} disabled={submitting}>
+      <Button
+        variant="contained"
+        onClick={handleSubmit}
+        disabled={submitting}
+      >
         {submitting ? "Posting..." : "Post Comment"}
       </Button>
     </Box>

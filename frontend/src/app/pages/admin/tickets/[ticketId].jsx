@@ -14,49 +14,46 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
-import axios from "axios";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CommentSection from "../../components/CommentSection";
+import API from "../api/api";
 
-const statusColors = {
+const STATUS_COLORS = {
   Open: "warning",
   "In Progress": "info",
   Resolved: "success",
   Closed: "default",
 };
 
+const STATUS_OPTIONS = ["Open", "In Progress", "Resolved", "Closed"];
+
 const AllTicketDetailsPage = () => {
   const { ticketId } = useParams();
   const navigate = useNavigate();
+
   const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchTicketDetails = async () => {
+      try {
+        const { data } = await API.get(`/api/tickets/${ticketId}`);
+        setTicket(data);
+        setStatus(data.status);
+      } catch (error) {
+        console.error("Error fetching ticket:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchTicketDetails();
   }, [ticketId]);
 
-  const fetchTicketDetails = async () => {
-    try {
-      const res = await axios.get(`http://localhost:3000/api/tickets/${ticketId}`, {
-        withCredentials: true,
-      });
-      setTicket(res.data);
-      setStatus(res.data.status);
-    } catch (error) {
-      console.error("Error fetching ticket:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleStatusChange = async (newStatus) => {
     try {
-      await axios.patch(
-        `http://localhost:3000/api/tickets/${ticketId}/status`,
-        { status: newStatus },
-        { withCredentials: true }
-      );
+      await API.patch(`/api/tickets/${ticketId}/status`, { status: newStatus });
       setStatus(newStatus);
     } catch (error) {
       console.error("Failed to update status:", error);
@@ -99,7 +96,7 @@ const AllTicketDetailsPage = () => {
           </Typography>
           <Chip
             label={status}
-            color={statusColors[status] || "default"}
+            color={STATUS_COLORS[status] || "default"}
             size="medium"
             sx={{ mt: { xs: 2, sm: 0 } }}
           />
@@ -116,26 +113,20 @@ const AllTicketDetailsPage = () => {
           {ticket.description}
         </Typography>
 
-        {/* Ticket Info Stack */}
+        {/* Ticket Info */}
         <Stack spacing={1}>
-          <Typography variant="body2">
-            <strong>Category:</strong> {ticket.category}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Priority:</strong> {ticket.priority}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Created At:</strong> {new Date(ticket.createdAt).toLocaleString()}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Updated At:</strong> {new Date(ticket.updatedAt).toLocaleString()}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Created By:</strong> {ticket.createdBy?.name || "N/A"}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Assigned To:</strong> {ticket.assignedTo?.name || "Unassigned"}
-          </Typography>
+          {[
+            { label: "Category", value: ticket.category },
+            { label: "Priority", value: ticket.priority },
+            { label: "Created At", value: new Date(ticket.createdAt).toLocaleString() },
+            { label: "Updated At", value: new Date(ticket.updatedAt).toLocaleString() },
+            { label: "Created By", value: ticket.createdBy?.name || "N/A" },
+            { label: "Assigned To", value: ticket.assignedTo?.name || "Unassigned" },
+          ].map((info, idx) => (
+            <Typography key={idx} variant="body2">
+              <strong>{info.label}:</strong> {info.value}
+            </Typography>
+          ))}
         </Stack>
 
         {/* Status Update */}
@@ -146,10 +137,11 @@ const AllTicketDetailsPage = () => {
             label="Update Status"
             onChange={(e) => handleStatusChange(e.target.value)}
           >
-            <MenuItem value="Open">Open</MenuItem>
-            <MenuItem value="In Progress">In Progress</MenuItem>
-            <MenuItem value="Resolved">Resolved</MenuItem>
-            <MenuItem value="Closed">Closed</MenuItem>
+            {STATUS_OPTIONS.map((s) => (
+              <MenuItem key={s} value={s}>
+                {s}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Paper>
