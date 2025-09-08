@@ -23,13 +23,16 @@ app.use(cors({
 app.use(express.json()); 
 app.use(cookieParser());
 
+// ✅ Root route
+app.get("/", (req, res) => {
+  res.send("✅ Backend is live 🚀");
+});
 
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/comments", commentRoutes);
-
-connectDB
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
