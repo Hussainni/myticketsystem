@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
   const fetchLoggedInUser = async () => {
     setUserLoading(true);
     try {
-      const response = await API.get("/api/users/me"); // prepend /api here
+      const response = await API.get("/api/users/me", { withCredentials: true }); // prepend /api here
       if (response) {
         setIsAuthenticated(true);
       }
@@ -107,7 +107,7 @@ export function AuthProvider({ children }) {
       toast.error("Logout failed. Please try again.");
     }
   };
-  
+
   React.useEffect(() => {
     const initializeAuth = async () => {
       let authUserSr = getCookie("token");

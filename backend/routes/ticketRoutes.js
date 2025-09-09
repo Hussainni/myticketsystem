@@ -19,7 +19,7 @@ router.post("/", protect, authorizeRoles("employee"), createTicket);
 router.get("/assigned", protect,authorizeRoles("support"),  fetchAssignedTickets);
 router.get("/my", protect, authorizeRoles("employee"), getMyTickets);
 router.get("/", protect, authorizeRoles("admin", "support"), getAllTickets);
-router.get("/stats", authorizeRoles("admin","support","employee"), getTicketStats);
+router.get("/stats", protect, authorizeRoles("admin","support","employee"), getTicketStats);
 router.get("/:id", protect, getTicketById);
 router.patch("/:id/status", protect, authorizeRoles("support", "admin"), updateTicketStatus);
 router.patch("/:id/assign", protect, authorizeRoles("admin"), assignTicket);
