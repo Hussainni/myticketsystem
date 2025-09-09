@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": " vite build",
+    "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
+  },
+  "engines": {
+    "node": "20.x"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^41.4.2",
@@ -65,6 +68,7 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "prettier": "^3.3.1",
     "prettier-plugin-organize-imports": "^3.2.4",
-    "vite": "^5.2.0"
+    "vite": "^5.2.0",
+    "rollup": "^4.13.0"
   }
 }
