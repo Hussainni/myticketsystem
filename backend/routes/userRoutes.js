@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.get("/", protect, authorizeRoles("admin"), getAllUsers);
 router.patch("/:id/role", protect, authorizeRoles("admin"), updateUserRole);
-router.get("/me", getCurrentUser);
+router.get("/me", protect, getCurrentUser);
 router.get("/support-agents", protect,authorizeRoles("admin"), getSupportAgents); // not used in frontend 
 router.put("/profile",protect, authorizeRoles("admin","employee","support"), updateProfile);
 router.put('/change-password', protect, changePassword);

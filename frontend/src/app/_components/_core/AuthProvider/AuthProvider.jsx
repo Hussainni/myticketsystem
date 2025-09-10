@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
   const fetchLoggedInUser = async () => {
     setUserLoading(true);
     try {
-      const response = await API.get("/api/users/me", { withCredentials: true }); // prepend /api here
+      const response = await API.get("/api/users/me"); // prepend /api here
       if (response) {
         setIsAuthenticated(true);
       }
