@@ -71,18 +71,45 @@ export function AuthProvider({ children }) {
     return await fetchLoggedInUser();
   };
 
+  // const login = async ({ email, password }) => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await API.post("/api/auth/login", { email, password }); // <-- /api
+  //     if (response.data.token) {
+  //       setCookie("token", response.data.token, 1);
+  //       setIsAuthenticated(true);
+  //       await fetchUser();
+  //       await fetchLoggedInUser();
+  //       toast.success("Login successful! Welcome back!");
+  //       return response.data;
+  //     }
+  //     return false;
+  //   } catch (error) {
+  //     setIsAuthenticated(false);
+  //     toast.error(error.response?.data?.message || "Login failed. Please try again.");
+  //     return false;
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
   const login = async ({ email, password }) => {
     setLoading(true);
     try {
-      const response = await API.post("/api/auth/login", { email, password }); // <-- /api
+      const response = await API.post("/api/auth/login", { email, password });
+
       if (response.data.token) {
-        setCookie("token", response.data.token, 1);
+        // Instead of manually setting cookie, set header for fallback
+        API.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
+
         setIsAuthenticated(true);
         await fetchUser();
         await fetchLoggedInUser();
         toast.success("Login successful! Welcome back!");
         return response.data;
       }
+
       return false;
     } catch (error) {
       setIsAuthenticated(false);
@@ -92,6 +119,8 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   };
+
+
 
   const logout = async () => {
     try {
