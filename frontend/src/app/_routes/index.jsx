@@ -109,6 +109,11 @@ const routes = [
     path: "/",
     element: <StretchedLayout />,
     children: [
+
+        {
+        path: "",
+        element: <Page Component={OverviewPage} hoc={withAuth} />,
+      },
       // routes for admin dashboard
       {
         path: "/admin-dashboard/overview",
