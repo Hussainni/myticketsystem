@@ -102,11 +102,11 @@ const LoginForm = () => {
             label={t("login.rememberMe")}
             defaultChecked
           />
-          <Typography textAlign={"right"} variant={"body1"}>
+          {/* <Typography textAlign={"right"} variant={"body1"}>
             <Link underline="none" to={"/auth/forgot-password"}>
               {t("login.forgotPassword")}
             </Link>
-          </Typography>
+          </Typography> */}
         </Stack>
         <LoadingButton
           fullWidth
