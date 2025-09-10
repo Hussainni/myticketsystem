@@ -87,53 +87,6 @@ const ForgotPassword = () => {
           </Typography>
         </CardContent>
       </Card>
-      <Typography variant={"body1"} mb={2}>
-        Or sign up with
-      </Typography>
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <IconButton
-          sx={{
-            bgcolor: "#385196",
-            color: "common.white",
-            p: (theme) => theme.spacing(1.25),
-
-            "&:hover": {
-              backgroundColor: "#385196",
-            },
-          }}
-          aria-label="Facebook"
-        >
-          <Facebook fontSize="small" />
-        </IconButton>
-        <IconButton
-          sx={{
-            bgcolor: "#00a8ff",
-            color: "common.white",
-            p: (theme) => theme.spacing(1.25),
-
-            "&:hover": {
-              backgroundColor: "#00a8ff",
-            },
-          }}
-          aria-label="Twitter"
-        >
-          <Twitter fontSize="small" />
-        </IconButton>
-        <IconButton
-          sx={{
-            bgcolor: "#23272b",
-            color: "common.white",
-            p: (theme) => theme.spacing(1.25),
-
-            "&:hover": {
-              backgroundColor: "#23272b",
-            },
-          }}
-          aria-label="Twitter"
-        >
-          <Google fontSize="small" />
-        </IconButton>
-      </Stack>
     </Div>
   );
 };
