@@ -15,7 +15,7 @@ const app = express();
 // ✅ CORS middleware
 app.use(
   cors({
-    origin: ["https://myticketsystem.vercel.app", "http://localhost:5173"], // ✅ allow frontend origins
+    origin: ["https://myticketsystems.vercel.app", "http://localhost:5173"], // ✅ allow frontend origins
     credentials: true, // ✅ allow cookies & auth headers
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // ✅ include OPTIONS
     allowedHeaders: ["Content-Type", "Authorization"], // ✅ custom headers
