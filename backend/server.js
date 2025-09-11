@@ -17,13 +17,11 @@ app.use(
   cors({
     origin: ["https://myticketsystem.vercel.app", "http://localhost:5173"], // ✅ allow frontend origins
     credentials: true, // ✅ allow cookies & auth headers
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // ✅ include OPTIONS
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // ✅ include OPTIONS
     allowedHeaders: ["Content-Type", "Authorization"], // ✅ custom headers
   })
 );
 
-// ✅ Handle preflight requests explicitly
-app.options("*", cors());
 
 // ✅ Middlewares
 app.use(express.json());
