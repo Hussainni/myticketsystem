@@ -12,30 +12,37 @@ import path from "path";
 dotenv.config();
 const app = express();
 
-// app.use(cors());
-app.use(cors({
-  origin: ['https://myticketsystems.vercel.app', 'http://localhost:5173'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// ✅ CORS middleware
+app.use(
+  cors({
+    origin: ["https://myticketsystem.vercel.app", "http://localhost:5173"], // ✅ allow frontend origins
+    credentials: true, // ✅ allow cookies & auth headers
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // ✅ include OPTIONS
+    allowedHeaders: ["Content-Type", "Authorization"], // ✅ custom headers
+  })
+);
 
-app.use(express.json()); 
+// ✅ Handle preflight requests explicitly
+app.options("*", cors());
+
+// ✅ Middlewares
+app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Root route
+// ✅ Root test route
 app.get("/", (req, res) => {
   res.send("✅ Backend is live 🚀");
 });
 
-// API routes
+// ✅ API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/comments", commentRoutes);
 
+// ✅ Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   connectDB();
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
