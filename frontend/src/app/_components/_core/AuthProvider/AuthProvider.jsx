@@ -71,28 +71,6 @@ export function AuthProvider({ children }) {
     return await fetchLoggedInUser();
   };
 
-  // const login = async ({ email, password }) => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await API.post("/api/auth/login", { email, password }); // <-- /api
-  //     if (response.data.token) {
-  //       setCookie("token", response.data.token, 1);
-  //       setIsAuthenticated(true);
-  //       await fetchUser();
-  //       await fetchLoggedInUser();
-  //       toast.success("Login successful! Welcome back!");
-  //       return response.data;
-  //     }
-  //     return false;
-  //   } catch (error) {
-  //     setIsAuthenticated(false);
-  //     toast.error(error.response?.data?.message || "Login failed. Please try again.");
-  //     return false;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
 
   const login = async ({ email, password }) => {
     setLoading(true);
@@ -102,7 +80,7 @@ export function AuthProvider({ children }) {
       if (response.data.token) {
         // Instead of manually setting cookie, set header for fallback
         API.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
-
+        localStorage.setItem("token", response.data.token);
         setIsAuthenticated(true);
         await fetchUser();
         await fetchLoggedInUser();
@@ -137,20 +115,38 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // React.useEffect(() => {
+  //   const initializeAuth = async () => {
+  //     let authUserSr = getCookie("token");
+  //     if (authUserSr) {
+  //       setIsAuthenticated(true);
+  //       // Fetch user data if authenticated
+  //       await fetchUser();
+  //       await fetchLoggedInUser()
+  //     }
+  //     setLoading(false);
+  //   };
+
+  //   initializeAuth();
+  // }, []);
+
+
   React.useEffect(() => {
     const initializeAuth = async () => {
-      let authUserSr = getCookie("token");
+      let authUserSr = getCookie("token") || localStorage.getItem("token"); // check both
       if (authUserSr) {
+        API.defaults.headers.common["Authorization"] = `Bearer ${authUserSr}`;
         setIsAuthenticated(true);
-        // Fetch user data if authenticated
         await fetchUser();
-        await fetchLoggedInUser()
+        await fetchLoggedInUser();
       }
       setLoading(false);
     };
-
     initializeAuth();
   }, []);
+
+
+
 
   return (
     <AuthContext.Provider value={{
